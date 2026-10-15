@@ -1,6 +1,6 @@
 # Towards an AI-Native Blockchain Framework
 
-This repository contains the official codebase, simulation engines, security taxonomy, post-quantum cryptographic benchmarks, and the IEEE TDSC manuscript for our research proposal: **"Towards an AI-Native Blockchain Framework: Integrating Proof of Useful Intelligence, Zero-Knowledge Machine Learning Security, and Post-Quantum Cryptography"**.
+This repository contains simulation code, a ZKML circuit checklist, PQC sizing spreadsheets, and an IEEE conference-style manuscript on trust scoring for proof-of-useful-intelligence (PoUI) consensus. The paper is a **model and analysis**, not a deployed blockchain.
 
 Authors: **Md. Mehedi Hasan**, **Asraful Islam Sharthak**, and **Prof. Dr. Md. Abdul Based**, Principal Investigator
 
@@ -55,7 +55,33 @@ Evaluate the performance and security bounds of the Proof of Useful Intelligence
 ```bash
 python3 simulation/compare_pos_poui.py
 ```
-*Key Result:* PoUI convergence is **225× faster** than PoS in identifying and excluding malicious validator nodes.
+*Note:* The large speed-up in `compare_pos_poui.py` is against a **toy 2%-per-epoch governance vote**, not Ethereum-style proof of stake. The conference paper states this explicitly.
+
+### 2a. Reproduce the paper's trust-score results
+```bash
+# Fixed-seed result used for the per-run summary (seed 42)
+python3 simulation/run_simulation.py
+
+# Ten-seed aggregate reported in the paper
+python3 simulation/run_multiseed.py
+
+# Closed-form quantities for the stated independent-audit model
+python3 simulation/formal_analysis.py
+
+# Audit-probability and false-positive sensitivity calculations
+python3 simulation/sensitivity_analysis.py
+```
+The resulting JSON files distinguish analytical quantities from the sampled Monte Carlo. They are not evidence of a trained model, ZKML prover, deployed network, or live PoS comparison.
+
+### 2b. Run the minimal ZKML proof-pipeline smoke test
+```bash
+# One-time local dependencies (installed under zkml-prototype/.deps)
+python3 -m pip install --target zkml-prototype/.deps ezkl==23.0.5 onnx==1.16.2
+
+# Deterministic Gemm(2×2) → ReLU ONNX model, then EZKL setup/prove/verify
+PYTHONPATH=zkml-prototype/.deps python3 zkml-prototype/run_tiny_mlp.py
+```
+This creates [artifacts](zkml-prototype/artifacts/) and `zkml-prototype/results.json`. It is a local smoke test only: its model is intentionally tiny, timings are machine-specific, and its locally generated SRS must never be used in deployment.
 
 ### 3. Generate Paper Figures
 To regenerate all research figures (Fig. 1-4 and PRISMA Flowchart) in the `paper/figures/` folder:
@@ -75,30 +101,24 @@ python3 literature/prisma_slr.py
 
 ---
 
-## 📊 Summary of Research Findings
+## Summary of results (what the code actually measures)
 
-### 🛡️ PoUI Trust Score (RQ1)
-*   **Malicious Exclusion Rate:** **100%** of malicious nodes (15/15) excluded from the active validator set.
-*   **Exclusion Speed:** Mean exclusion epoch of **2.53 epochs**, converging with $P \ge 0.96$ by epoch 8.
-*   **Sybil Resistance:** Mathematical gap parameter $\Delta = 0.725 > 0$, rendering Sybil strategies strictly disadvantageous.
-*   **Game-Theoretic Soundness:** Proven that the unique Nash Equilibrium for a rational validator is genuine computation ($A_t = 1.0$).
+### PoUI trust score
+*   **Simulation:** $N=100$ (70 honest, 15 high-latency, 15 malicious), 1,000 epochs, seed 42. Accuracy/latency are **sampled distributions**, not a trained MobileNet.
+*   **Exclusion:** 15/15 malicious on every one of 10 seeds; 0 honest excluded. Seed 42 mean epoch **2.53**; mean-of-means **3.12** (std 0.71) vs geometric $1/0.35\approx 2.86$.
+*   **Sybil gap:** $\Delta=\alpha\phi_L(\mathbb{E}[A_H^2]-\mathbb{E}[A_F^2])+\gamma p$ under independent $A,L$ (not $e^{-\lambda\mathbb{E}[L]}$).
+*   **One-shot maximizer:** unique at $A_t=1$ (not a repeated-game Nash theorem).
+*   **Exclusion time:** geometric waiting time $M\sim\mathrm{Geo}(p=0.35)$, $\mathbb{E}[M]=1/p\approx 2.86$; sim mean $2.53$ on 15 nodes.
+*   **vs ``PoS'':** toy vote with $p=0.02$/epoch (86.7% excluded, mean epoch 568). Do not report this as Ethereum PoS.
 
-### 🧬 ZKML Security Taxonomy (RQ2)
-Classifies the 5 major underconstrained circuit vulnerability vectors for on-chain machine learning inference:
-1.  **V-I (Under-Range Constraint):** Bypassing activation range checks.
-2.  **V-II (Non-Deterministic Witness Assignment):** Bypassing ArgMax/TopK sorting.
-3.  **V-III (Missing Intermediate Constraint):** Skipping intermediate neural layers.
-4.  **V-IV (Floating-Point Approximation Exploit):** Logit shifts via scaling factors.
-5.  **V-V (Commitment-Output Mismatch):** Proving correctness on an uncommitted model.
+### ZKML checklist
+Five underconstraint patterns (range, witness choice, missing layers, quantization slack, wrong-model commitment). Design requirements, **not** an EZKL/Halo2 exploit study.
 
-### 🔑 Post-Quantum Cryptography Overhead (RQ3)
-*   **Recommendation:** **ML-DSA-44** (signatures) + **ML-KEM-768** (key exchange).
-*   **Overhead Mitigation:** Naive state growth of 20.24 MB/block is reduced to **202 KB/block** using signature aggregation (Mitigation M1).
+### PQC sizing
+ML-DSA / ML-KEM **parameter tables + published timings**, not a local liboqs benchmark. Aggregation to ~200 KB/block is an assumption, not a measured aggregator.
 
-### 🤝 Co-Design Security Properties (RQ4 & RQ5)
-*   **ESP-1 (Proof-of-Identity Chain):** Establishes non-repudiation of validator outputs.
-*   **ESP-3 (Layered Slash Amplification):** Cryptographic ZKML proofs make slashing decisions irrefutable.
-*   **FM-CD-4 (Size Budget Overflow):** Demonstrates that without co-design mitigations, PQC-signed proofs overrun traditional block budgets.
+### Co-design
+Interface contracts IC-01–IC-04 and failure modes (slot race, key-rotation desync, classical bootstrap, size overflow). Architecture notes, not a running node.
 
 ---
 

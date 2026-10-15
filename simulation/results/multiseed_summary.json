@@ -1,0 +1,94 @@
+{
+  "scope": "Monte Carlo of sampled observables under the independent-audit model; not a trained-model, ZKML, network, or proof-of-stake evaluation.",
+  "seeds": [
+    42,
+    7,
+    13,
+    99,
+    123,
+    256,
+    512,
+    1024,
+    2024,
+    31415
+  ],
+  "runs": [
+    {
+      "seed": 42,
+      "malicious_excluded": 15,
+      "malicious_total": 15,
+      "mean_exclusion_epoch": 2.53,
+      "honest_excluded": 0
+    },
+    {
+      "seed": 7,
+      "malicious_excluded": 15,
+      "malicious_total": 15,
+      "mean_exclusion_epoch": 2.87,
+      "honest_excluded": 0
+    },
+    {
+      "seed": 13,
+      "malicious_excluded": 15,
+      "malicious_total": 15,
+      "mean_exclusion_epoch": 3.67,
+      "honest_excluded": 0
+    },
+    {
+      "seed": 99,
+      "malicious_excluded": 15,
+      "malicious_total": 15,
+      "mean_exclusion_epoch": 2.47,
+      "honest_excluded": 0
+    },
+    {
+      "seed": 123,
+      "malicious_excluded": 15,
+      "malicious_total": 15,
+      "mean_exclusion_epoch": 4.0,
+      "honest_excluded": 0
+    },
+    {
+      "seed": 256,
+      "malicious_excluded": 15,
+      "malicious_total": 15,
+      "mean_exclusion_epoch": 2.93,
+      "honest_excluded": 0
+    },
+    {
+      "seed": 512,
+      "malicious_excluded": 15,
+      "malicious_total": 15,
+      "mean_exclusion_epoch": 2.6,
+      "honest_excluded": 0
+    },
+    {
+      "seed": 1024,
+      "malicious_excluded": 15,
+      "malicious_total": 15,
+      "mean_exclusion_epoch": 4.13,
+      "honest_excluded": 0
+    },
+    {
+      "seed": 2024,
+      "malicious_excluded": 15,
+      "malicious_total": 15,
+      "mean_exclusion_epoch": 2.2,
+      "honest_excluded": 0
+    },
+    {
+      "seed": 31415,
+      "malicious_excluded": 15,
+      "malicious_total": 15,
+      "mean_exclusion_epoch": 3.8,
+      "honest_excluded": 0
+    }
+  ],
+  "summary": {
+    "all_malicious_excluded_each_seed": true,
+    "total_honest_excluded": 0,
+    "mean_of_per_seed_means": 3.12,
+    "sample_std_of_per_seed_means": 0.7107,
+    "geometric_prediction": 2.8571
+  }
+}

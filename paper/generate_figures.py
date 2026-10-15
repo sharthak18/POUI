@@ -160,19 +160,19 @@ print(f"Saved: {out_dir}/fig_pqc_benchmarks.png")
 fig2, ax = plt.subplots(figsize=(14, 7), facecolor=BG)
 ax.set_facecolor(BG)
 ax.axis("off")
-fig2.suptitle("ZKML Underconstrained Circuit Vulnerability Taxonomy (RQ2)\n"
-              "Towards an AI-Native Blockchain Framework",
+fig2.suptitle("ZKML Circuit-Soundness Requirements for PoUI\n"
+              "Analytical Feasibility Study",
               fontsize=13, fontweight="bold", color=TXT_H)
 
 vuln_data = [
-    ("V-I",   "Under-Range\nConstraint",      "Low",    "ReLU, Sigmoid,\nSoftmax int8",   C_MAL),
-    ("V-II",  "Non-Deterministic\nWitness",   "Medium", "ArgMax, TopK,\nAttention",       C_AMBER),
-    ("V-III", "Missing\nIntermediate",         "High",   "All layers,\nResidual",          C_PURPLE),
-    ("V-IV",  "Float Approx\nExploit",         "High",   "Quantized\nConv/Linear",         "#79c0ff"),
-    ("V-V",   "Commitment-\nOutput Mismatch", "Low",    "Weight Loading,\nAll Tensors",   C_MAL),
+    ("V-I",   "Range\nEnforcement",       "ReLU, Sigmoid,\nQuantized wires", C_MAL),
+    ("V-II",  "Deterministic\nWitness",    "ArgMax, TopK,\nTied outputs", C_AMBER),
+    ("V-III", "Layer\nLinkage",            "Intermediate layers,\nResidual paths", C_PURPLE),
+    ("V-IV",  "Fixed\nQuantization",       "Scale, zero point,\nQuantized ops", "#79c0ff"),
+    ("V-V",   "Model\nCommitment",         "Weights, model\nversion", C_MAL),
 ]
 
-for i, (vid, name, complexity, layers, color) in enumerate(vuln_data):
+for i, (vid, name, layers, color) in enumerate(vuln_data):
     x0 = 0.05 + i * 0.19
     # Main box
     rect = mpatches.FancyBboxPatch((x0, 0.35), 0.16, 0.50,
@@ -187,24 +187,21 @@ for i, (vid, name, complexity, layers, color) in enumerate(vuln_data):
     # Name
     ax.text(x0 + 0.08, 0.72, name, ha='center', va='center',
             fontsize=8.5, color=TXT_H, transform=ax.transAxes)
-    # Complexity badge
-    badge_color = C_MAL if complexity == "High" else (C_AMBER if complexity == "Medium" else C_TEAL)
+    # Requirement badge
+    badge_color = C_ACCENT
     badge = mpatches.FancyBboxPatch((x0 + 0.02, 0.57), 0.12, 0.07,
                                      boxstyle="round,pad=0.01",
                                      facecolor=badge_color, alpha=0.3,
                                      edgecolor=badge_color, linewidth=1,
                                      transform=ax.transAxes)
     ax.add_patch(badge)
-    ax.text(x0 + 0.08, 0.605, f"Complexity: {complexity}", ha='center', va='center',
+    ax.text(x0 + 0.08, 0.605, "Required constraint", ha='center', va='center',
             fontsize=7, color=badge_color, fontweight='bold', transform=ax.transAxes)
     # Affected layers
     ax.text(x0 + 0.08, 0.46, f"Layers:\n{layers}", ha='center', va='center',
             fontsize=7, color=TXT, transform=ax.transAxes)
-    # PoC badge
-    poc = "PoC ✓" if vid in ("V-I", "V-V") else "PoC pending"
-    poc_col = C_TEAL if vid in ("V-I", "V-V") else "#8b949e"
-    ax.text(x0 + 0.08, 0.38, poc, ha='center', va='center',
-            fontsize=7, color=poc_col, fontweight='bold', transform=ax.transAxes)
+    ax.text(x0 + 0.08, 0.38, "Required circuit check", ha='center', va='center',
+            fontsize=7, color=C_ACCENT, fontweight='bold', transform=ax.transAxes)
 
 # Soundness condition box
 ax.add_patch(mpatches.FancyBboxPatch((0.05, 0.08), 0.90, 0.20,
@@ -213,7 +210,7 @@ ax.add_patch(mpatches.FancyBboxPatch((0.05, 0.08), 0.90, 0.20,
 ax.text(0.50, 0.24, "Circuit Soundness: ∀ (x, y, π): Verify(C, x, y, π) = 1  ⟹  y = f(x)",
         ha='center', va='center', fontsize=9.5, color=C_ACCENT,
         fontweight='bold', transform=ax.transAxes)
-ax.text(0.50, 0.14, "Violation: ∃ (x, y*, π*) s.t. Verify accepts y* ≠ f(x)  →  Inflated Trust Score Tₜ",
+ax.text(0.50, 0.14, "Checklist only: a compiler/model-specific audit is still required before deployment.",
         ha='center', va='center', fontsize=8.5, color=TXT, transform=ax.transAxes)
 
 fig2.savefig(out_dir / "fig_zkml_taxonomy.png", dpi=150, bbox_inches="tight", facecolor=BG)
@@ -227,19 +224,19 @@ print(f"Saved: {out_dir}/fig_zkml_taxonomy.png")
 fig3, ax3 = plt.subplots(figsize=(14, 8), facecolor=BG)
 ax3.set_facecolor(BG)
 ax3.axis("off")
-fig3.suptitle("PoUI + ZKML + PQC Co-Design Architecture (RQ4)\n"
-              "Towards an AI-Native Blockchain Framework",
+fig3.suptitle("PoUI Challenge--Proof--Score Requirements\n"
+              "Analytical Feasibility Study",
               fontsize=13, fontweight="bold", color=TXT_H)
 
 layers = [
     {"label": "L1: PoUI Consensus Layer",
-     "desc": "Trust Score Tₜ computation\nValidator selection & slashing\nEpoch management",
+     "desc": "Epoch nonce and challenge commitment\nScore update and slash decision\nUnderlying consensus supplies finality",
      "color": C_HONEST, "y": 0.68},
     {"label": "L2: ZKML Proof Layer",
-     "desc": "Neural network inference\nZK proof generation (EZKL)\nProof verification on-chain",
+     "desc": "Committed model inference\nProof binds challenge, model, and output\nVerifier accepts or rejects proof",
      "color": C_ACCENT, "y": 0.42},
     {"label": "L3: PQC Signature Layer",
-     "desc": "ML-DSA-44 signing (FIPS 204)\nML-KEM-768 key encapsulation\nQuantum-safe identity",
+     "desc": "ML-DSA signs the proof transcript\nML-KEM delivers hidden probes\nKey version overlap at rotation",
      "color": C_PURPLE, "y": 0.16},
 ]
 
@@ -265,13 +262,13 @@ for y_start, label_ic in [(0.68, "IC-01: RequestInferenceProof\nIC-02: SubmitVer
     ax3.text(0.37, y_start - 0.027, label_ic, ha='left', va='center',
              fontsize=7.5, color="#8b949e", transform=ax3.transAxes)
 
-# Emergent properties panel
+# Required bindings panel
 props = [
-    ("ESP-1", "Proof-of-Identity Chain",     C_TEAL),
-    ("ESP-2", "Quantum-Safe AI Governance",   C_ACCENT),
-    ("ESP-3", "Layered Slash Amplification",  C_AMBER),
+    ("B-1", "Epoch + validator nonce", C_TEAL),
+    ("B-2", "Model + quantization commitment", C_ACCENT),
+    ("B-3", "Output + proof-hash signature", C_AMBER),
 ]
-ax3.text(0.72, 0.88, "Emergent Security Properties\n(only from co-design)",
+ax3.text(0.72, 0.88, "Required Bindings\n(before score update)",
          ha='center', fontsize=10, fontweight='bold', color=TXT_H, transform=ax3.transAxes)
 for i, (pid, name, col) in enumerate(props):
     y_p = 0.72 - i * 0.13
@@ -285,14 +282,14 @@ for i, (pid, name, col) in enumerate(props):
              ha='center', va='center', fontsize=8, color=col,
              fontweight='bold', transform=ax3.transAxes)
 
-# Failure modes panel
+# Risks panel
 fms = [
     ("FM-CD-1", "Proving-Slot Race",       "High",   C_MAL),
     ("FM-CD-2", "Key Rotation Desync",     "Medium", C_AMBER),
     ("FM-CD-3", "Bootstrap Paradox",       "Low",    C_TEAL),
     ("FM-CD-4", "Size Budget Overflow",    "High",   C_MAL),
 ]
-ax3.text(0.72, 0.30, "Co-Design Failure Modes",
+ax3.text(0.72, 0.30, "Deployment Risks to Resolve",
          ha='center', fontsize=10, fontweight='bold', color=TXT_H, transform=ax3.transAxes)
 for i, (fid, name, sev, col) in enumerate(fms):
     y_f = 0.22 - i * 0.07

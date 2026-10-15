@@ -1,0 +1,65 @@
+{
+  "scope": "Closed-form sensitivity calculations under independent epochs and the one-slash exclusion rule; not a network or adversarial simulation.",
+  "audit_probability_sweep": [
+    {
+      "audit_probability": 0.1,
+      "expected_exclusion_epochs": 10.0,
+      "probability_excluded_by_epoch_8": 0.569533
+    },
+    {
+      "audit_probability": 0.2,
+      "expected_exclusion_epochs": 5.0,
+      "probability_excluded_by_epoch_8": 0.832228
+    },
+    {
+      "audit_probability": 0.35,
+      "expected_exclusion_epochs": 2.8571,
+      "probability_excluded_by_epoch_8": 0.968136
+    },
+    {
+      "audit_probability": 0.5,
+      "expected_exclusion_epochs": 2.0,
+      "probability_excluded_by_epoch_8": 0.996094
+    },
+    {
+      "audit_probability": 0.75,
+      "expected_exclusion_epochs": 1.3333,
+      "probability_excluded_by_epoch_8": 0.999985
+    }
+  ],
+  "false_positive_sweep": [
+    {
+      "per_epoch_false_positive_rate": 0.0,
+      "probability_of_at_least_one_false_slash": {
+        "10": 0.0,
+        "100": 0.0,
+        "1000": 0.0
+      }
+    },
+    {
+      "per_epoch_false_positive_rate": 1e-05,
+      "probability_of_at_least_one_false_slash": {
+        "10": 0.0001,
+        "100": 0.00099951,
+        "1000": 0.00995022
+      }
+    },
+    {
+      "per_epoch_false_positive_rate": 0.0001,
+      "probability_of_at_least_one_false_slash": {
+        "10": 0.00099955,
+        "100": 0.00995066,
+        "1000": 0.09516711
+      }
+    },
+    {
+      "per_epoch_false_positive_rate": 0.001,
+      "probability_of_at_least_one_false_slash": {
+        "10": 0.00995512,
+        "100": 0.09520785,
+        "1000": 0.63230458
+      }
+    }
+  ],
+  "interpretation": "Higher audit probability reduces expected malicious exclusion time. With one-slash exclusion, even small false-positive rates accumulate over long horizons; a deployed protocol needs appeal, repeated-evidence, or calibrated slashing rules."
+}

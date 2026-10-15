@@ -1,321 +1,294 @@
-\documentclass[journal]{IEEEtran}
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+\usepackage{cite}
 \usepackage{amsmath,amssymb,amsthm}
-\usepackage{hyperref}
 \usepackage{booktabs}
 \usepackage{graphicx}
-\usepackage{algorithm}
-\usepackage{algpseudocode}
-\usepackage{xcolor}
-\usepackage{cite}
+\usepackage{hyperref}
+\usepackage{url}
 
-% ─── Theorem environments ─────────────────────────────────────────────────────
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
 \newtheorem{corollary}{Corollary}
 \newtheorem{definition}{Definition}
-\newtheorem{proposition}{Proposition}
+\newtheorem{assumption}{Assumption}
 
-\title{Towards an AI-Native Blockchain Framework:\\
-Integrating Proof of Useful Intelligence, Zero-Knowledge\\
-Machine Learning Security, and Post-Quantum Cryptography}
+\title{An Analytical Feasibility Study of Post Quantum Sizing, ZKML Soundness, and Trust Scoring for Proof of Useful Intelligence Consensus}
 
-\author{Md. Mehedi Hasan, Asraful Islam Sharthak, \\
-and Prof. Dr. Md. Abdul Based,~\IEEEmembership{Principal Investigator}
-\IEEEcompsocitemizethanks{
-  \IEEEcompsocthanksitem Manuscript submitted to IEEE Transactions on Dependable
-  and Secure Computing (TDSC). \hfil\break
-  \IEEEcompsocthanksitem Corresponding author: Md. Mehedi Hasan.
-}}
+\author{
+\IEEEauthorblockN{Md.\ Mehedi Hasan, Asraful Islam Sharthak, Prof.\ Dr.\ Md.\ Abdul Based}
+\IEEEauthorblockA{\textit{Dhaka International University}\\
+Dhaka, Bangladesh}
+
+}
 
 \begin{document}
 \maketitle
 
-%─────────────────────────────────────────────────────────────────────────────
 \begin{abstract}
-Traditional blockchain consensus mechanisms face a series of critical bottlenecks. Existing Proof-of-Work and Proof-of-Stake protocols secure distributed networks but expend massive computational and capital resources without advancing scientific or artificial intelligence (AI) research. Concurrently, emerging solutions that utilize Zero-Knowledge Machine Learning (ZKML) to verify AI inferences suffer from formally undercharacterized vulnerability classes. These flaws allow malicious validators to forge proofs and compromise the network's integrity. Furthermore, the inevitable transition to post-quantum cryptography (PQC) introduces significant measurement overheads that remain largely unquantified within AI-intensive consensus environments. In this paper, we address these interconnected challenges by proposing a comprehensive, co-designed framework. First, we introduce and formally prove a Trust Score model for a Proof of Useful Intelligence (PoUI) consensus mechanism. Our formal analysis establishes strict bounds on trust scores, guarantees Sybil resistance, ensures non-gameability under rational adversarial assumptions, and provides convergence theorems for the rapid exclusion of malicious nodes. Extensive simulations ($N=100$ nodes over $1{,}000$ epochs) demonstrate a 100\% malicious exclusion rate. Second, we present the first formal taxonomy of underconstrained ZKML circuit vulnerabilities tailored to blockchain validators, outlining five specific attack classes and necessary constraint conditions to ensure circuit soundness. Third, we benchmark the overhead of ML-DSA and ML-KEM post-quantum cryptographic standards at scale, revealing that ML-DSA-44 is highly feasible across various throughput targets when coupled with appropriate block-size mitigations. Finally, we formally define the interface contracts that govern the integration of PoUI, ZKML, and PQC, highlighting emergent security properties and previously unexposed failure modes specific to their co-design. This work ultimately delivers a unified, formally grounded architectural blueprint for building AI-native blockchains that are resilient against both classical and quantum adversaries.
+
+Proof of useful intelligence (PoUI) replaces hash puzzles with useful AI computation. But, a consensus rule must still score validators, verify the claimed computation, and fit its cryptographic messages within a fix block. Three PoUI bottlenecks are modeled: post quantum payload size, proof soundness, and validator scoring. The scoring mechanism is implemented by the simulator, but a blockchain is not used. We establish a four term trust score and demonstrate score boundaries, an expected score difference between real and fake reports, a one shot incentive result, and a geometric exclusion time result under an explicit independent audit model. All 15 injected malicious nodes are eliminated in each of ten seeds in a 100 node Monte Carlo with sampling accuracy and latency. The mean exclusion epoch is $3.12$, which is near the model prediction of $1/0.35\approx2.86$. We present a challenge proof score protocol flow, validate an EZKL proof pipeline on a small affine ReLU model(6.91\,s prove, 27.5\,ms verify on our computer), identify five circuit needs, and estimate ML-DSA byte sizes using FIPS 204. The outcome is a replicable feasibility analysis and implementation needs, rather than performance data for a consensus protocol.
 \end{abstract}
 
 \begin{IEEEkeywords}
-Proof of Useful Intelligence, Zero-Knowledge Machine Learning, Post-Quantum Cryptography, ML-DSA, ML-KEM, Blockchain Consensus, Trust Score, Underconstrained Circuits, Co-Design Security
+Blockchain consensus, ML-DSA, ML-KEM, ZKML, underconstrained circuits, trust score, and proof of useful intelligence
 \end{IEEEkeywords}
 
-%─────────────────────────────────────────────────────────────────────────────
 \section{Introduction}
 \label{sec:intro}
 
-The evolution of blockchain consensus has historically been driven by the need to secure decentralized ledgers against adversarial manipulation. From the energy-intensive hash puzzles of Proof of Work (PoW)~\cite{nakamoto2008} to the capital-weighted staking models of Proof of Stake (PoS)~\cite{buterin2020eth}, consensus mechanisms have largely treated the underlying computational effort as a means to an end. Unfortunately, neither of these dominant paradigms manages to harness the vast computational power expended by validators for socially or scientifically productive purposes. The concept of Proof of Useful Intelligence (PoUI)~\cite{chong2025poui} offers a compelling paradigm shift in this regard: validators are required to prove they have executed genuine AI inference computation rather than solving arbitrary mathematical puzzles. By doing so, the consensus process is transformed into a highly distributed, trustless AI computation market.
+Proof of work in the Bitcoin method expends energy on a search that is worthless outside of consensus~\cite{nakamoto2008}. Proof of stake substitutes capital for that search~\cite{saleh2021pos}. Several fields of study, such useful proof of work~\cite{lihu2020pouw,baldominos2019coinai}, and more recently proof of useful intelligence (PoUI)~\cite{chong2025poui}. attempt to use the same machines on machine learning tasks instead. Model outputs are already paid for by markets like Bittensor, but instead of using a deterministic verifier, they rely on peer scoring within subnets~\cite{bittensor2024}.
 
-Despite its promise, transitioning to a PoUI-driven network introduces several complex and unresolved challenges that must be addressed jointly. First among these is the need for formal Trust Score guarantees. While empirical PoUI proposals exist, they frequently lack rigorous formal proofs of Sybil resistance and non-gameability. Without such guarantees, rational and economically motivated validators can easily manipulate scoring functions to siphon rewards without executing the genuine computation the network requires.
+If PoUI is going to be used as a consensus rule, three engineering problems come up at once.
 
-A second critical challenge lies in the security of ZKML circuits. Within a PoUI framework, validators must submit Zero-Knowledge proofs that attest to the correctness of their AI inference outputs without revealing proprietary model weights or inputs. While foundational ZKP security analysis exists (such as the automated detection mechanisms proposed by Pailoor et al.~\cite{pailoor2023ccs}), these methodologies have not been thoroughly adapted to the specific vulnerabilities of ZKML in a validator context. In such environments, adversaries have strong economic incentives to discover and exploit underconstrained circuits to forge inference proofs.
+\begin{enumerate}
+  \item \textbf{Scoring.} Accuracy, latency, and uptime must be combined into a figure that is difficult to inflate by dividing identities or submitting a convincing looking fake output.
+  \item \textbf{Proof soundness.} A SNARK or comparable evidence that "the model ran" is only as reliable as the circuit. In general purpose ZK systems, underconstrained circuits are a known class of bugs~\cite{pailoor2023pldi}, neural network devices (ReLU, ArgMax, quantized softmax) add more ways to cheat.
+  \item \textbf{Post quantum bytes.} FIPS 204 signatures are significantly larger than Ed25519~\cite{nistfips204,rfc8032}. Replacing validator signatures without considering block size is not recommended.
+\end{enumerate}
 
-The third challenge is the impending necessity of post-quantum readiness. With NIST's 2024 finalization of ML-DSA (FIPS 204) and ML-KEM (FIPS 203)~\cite{nist2024pqc}, there are now concrete, quantum-safe cryptographic primitives available. However, the computational and storage overheads of implementing these algorithms in AI-intensive consensus networks remain largely unquantified. Existing benchmarks~\cite{pqc_blockchain2025} target classical blockchain operations, which differ significantly from the heavy workloads characteristic of PoUI systems.
+\paragraph{Research topic and methodology}
+ What verification and message budget requirements must go along with a PoUI trust score, and under what explicit assumptions can it exclude low quality reports? We respond to it with (i) a simple analysis of a score and audit model, (ii) a reproducible Monte Carlo that verifies the model's exclusion time prediction, and (iii) a needs analysis for the post quantum interfaces and ZKML. Instead of being an implementation or a head to head consensus benchmark, the study is purposefully an analysis of requirements and feasibility.
 
-Finally, we must consider the broader co-design interaction effects. To date, no literature explores the emergent properties and potential security risks of integrating PoUI, ZKML, and PQC simultaneously. Integrating these layers introduces complex failure modes that are simply invisible when analyzing each pillar in isolation.
+\paragraph{Contributions}
+\begin{itemize}
+  \item \textbf{Audited trust score model.} We provide bounds, an expected score gap, a one shot incentive result, and a geometric exclusion time theorem under specific audit and independence assumptions.
+  \item \textbf{Model consistency evaluation.} A 100 node and ten seed Monte Carlo analysis produces a typical malicious exclusion epoch of $3.12$, which corresponds to the analytical predictive value of $2.86$.
+  \item \textbf{Protocol and implementation requirements.} We define a challenge resistant score flow, combine five essential ZKML constraint verifications, and recognize FIPS 204 byte and cross layer failure mode limitations.
+  \item \textbf{ZKML pipeline smoke test.} We create, validate, and confirm a deterministic two input affine ReLU ONNX model using EZKL. The provided artifacts and script showcase the complete toolchain, rather than serving as a benchmark for a useful model.
+\end{itemize}
 
-To bridge these gaps, our research provides a formally proven Trust Score model alongside comprehensive analyses of ZKML circuit vulnerabilities and PQC integration overheads. In doing so, we deliver a cohesive, secure blueprint for next-generation, AI-native blockchain networks.
+\paragraph{Evaluation boundary}
+The simulator does not perform training on or execute a neural model, facilitate network message exchanges, or assess PQC operations. While we incorporate a small EZKL proof smoke test, we do not assert that this constitutes an EZKL/Halo2 audit, general ZKML performance, a repeated game Nash equilibrium, local PQC benchmarks, or that it outperforms an existing proof of stake protocol. The voting baseline of the simulator is merely a 2\% per epoch simplistic process designed to demonstrate the contrast between slashing triggered by automatic audits and governance removal that occurs after a delay.
+\section{Related Work}
+\label{sec:related}
 
-%─────────────────────────────────────────────────────────────────────────────
-\section{Background and Related Work}
-\label{sec:background}
+Chong et al.\ present PoUI as an effective integration of AI work with staking~\cite{chong2025poui}. We incorporate a clear four term score along with an exclusion threshold, providing proofs solely under the audit model outlined in Section~\ref{sec:trust}. Lihu et al.\ and Baldominos and Saez incorporate training or inference within the mining loop~\cite{lihu2020pouw,baldominos2019coinai}. DeepChain examines collaborative learning that is compatible with incentives and features on chain audit trails~\cite{weng2021deepchain}. Bittensor is the most similar deployed market. It's trust relies on social and subnet specific factors~\cite{bittensor2024}.
+Groth's SNARK and PLONK backends are commonly used in proofs~\cite{groth2016,plonk2019}. Pailoor et al.\ (PLDI 2023) developed an automated method for identifying underconstrained circuits~\cite{pailoor2023pldi}. Peng et al.\ conducted a survey on verifiable machine learning, including cost and quantification~\cite{peng2025zkml}. EZKL builds ONNX style graphs into circuits~\cite{ezkl2024}. Worldcoin employs zero knowledge proofs for biometric uniqueness, a distinct threat model from validator inference~\cite{worldcoin2023}.
 
-To systematically map the research landscape and ensure exhaustive coverage of related literature, our study adhered to the PRISMA (Preferred Reporting Items for Systematic Reviews and Meta-Analyses) guidelines. The detailed article selection process is illustrated in Fig.~\ref{fig:prisma_flowchart}.
+NIST standardized ML-KEM and ML-DSA in 2024~\cite{nistfips203,nistfips204}.  Baseri et al.\ evaluated the risk of ledger migration during quantum attacks~\cite{baseri2025quantum}.These studies size signatures for everyday transactions. They do not budget for a proving-intensive PoUI slot.
+This work connects these strands at the requirement level.
+The score indicates what should be measured, the circuit determines what can be trusted, and the PQC payload must fit in to the protocol's timing and byte budgets.
 
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\columnwidth]{figures/fig_prisma_flowchart.png}
-  \caption{PRISMA flowchart detailing the systematic literature review process for identifying studies relevant to PoUI, ZKML, and PQC in blockchain contexts.}
-  \label{fig:prisma_flowchart}
-\end{figure}
+\section{Threat Model and Scope}
+\label{sec:threat}
 
-\subsection{Proof of Useful Intelligence}
+A permissionless validator set of size $N$ is used. Each epoch $t$ a node provides an inference accuracy proxy $A_t\in[0,1]$, a latency $L_t\geq 0$ (ms), an uptime ratio $U_t\in(0,1]$, and a slash bit $S_t\in\{0,1\}$. Honest nodes draw $A_t$ from a clipped Gaussian and $L_t$ from a truncated Gaussian (Section~\ref{sec:sim}). Malicious nodes draw $A_t$ uniformly from $[0.10,0.30]$ and audited with probability $p_{\mathrm{detect}}=0.35$ whenever $A_t$ is below a threshold $\tau=0.40$. Honest nodes are never slashed in this model (false positive rate zero). The final option is described as a limitation and is optimistic.
 
-The shift toward productive consensus mechanisms was formalized by Chong et al.~\cite{chong2025poui}, who introduced PoUI as a sustainable alternative to traditional PoW. In this model, validators provide verified AI inference results to demonstrate their computational effort. This builds upon earlier explorations by Balaha et al.~\cite{balaha2020pow}, who investigated AI-coupled PoW concepts, albeit without an emphasis on formal security proofs. Recent production deployments have begun to reflect these ideas; for instance, Bittensor~\cite{bittensor2024} facilitates a distributed AI compute market secured by a specialized PoS variant. However, Bittensor fundamentally relies on subjective peer-to-peer evaluations within subnets rather than deterministic cryptographic verification. Similarly, while Lightchain AI~\cite{lightchain2025} introduces a Layer-1 architecture that treats native AI inference as its core consensus primitive, a critical gap remains across these frameworks: current implementations, including early proof-of-learning variants, do not offer a formally proven, manipulation-resistant Trust Score capable of bounding Sybil attacks and ensuring convergence through zero-knowledge proofs.
+The investigation focuses on low quality fabricators whose reported accuracy falls below the audit level. Duplicating an identity does not improve its anticipated score. It does not provide Sybil resistance to identity formation without cost, collusion, adaptive reporting, network level eclipse attacks, stake grinding, or associated latency.
 
-\subsection{Zero-Knowledge Machine Learning}
+The simulator presently refers to ZKML as a verification tool rather than a callable feature. Section~\ref{sec:zkml}'s taxonomy serves as a list of requirements for a future circuit rather than a measurement of an assembled graph.
 
-Zero-Knowledge Machine Learning has seen rapid advancement as a method for verifying off-chain computations. Peng et al.~\cite{peng2025zkml} recently surveyed numerous ZKML architectures, highlighting proving costs and circuit expressiveness as primary implementation bottlenecks. Industry efforts have proven the viability of the technology; Modulus Labs~\cite{modulus2024} successfully demonstrated the on-chain verification of massive neural networks, and Worldcoin~\cite{worldcoin2023} deployed ZKML at scale for privacy-preserving biometric verification. In the academic sphere, Pailoor et al.~\cite{pailoor2023ccs} automated the detection of underconstrained circuits in ZKP systems. Despite these advancements, there remains no dedicated taxonomy of underconstrained circuit attack vectors specifically mapped to ZKML inference within an economically adversarial blockchain validator setting.
+Key and signature sizes are based on FIPS 204 Table~2~\cite{nistfips204}. % TODO(authors): "the spreadsheet" is never introduced and no timings appear in this paper. Cite the repo file or delete this sentence.
+The spreadsheet uses microsecond figures as placeholders for clarity. These are neither SUPERCOP or liboqs measurements from this group.
 
-\subsection{Post-Quantum Cryptography in Blockchain}
+\section{Trust Score}
+\label{sec:trust}
 
-The looming threat of quantum computing has necessitated the rapid integration of PQC into distributed ledgers. Schemitt et al.~\cite{schemitt2025sok} have demonstrated that naive, direct substitutions of classical signatures with PQC variants introduce severe storage and bandwidth bloat. In response to NIST's 2024 standardization efforts~\cite{nist2024pqc}, researchers like Chhetri et al.~\cite{chhetri2025quantum} have outlined phased migration strategies for legacy networks. While comprehensive impact assessments exist for traditional blockchains~\cite{pqc_blockchain2025}, these studies do not account for the unique, heavy data payloads characteristic of AI-integrated consensus protocols. 
-
-\subsection{Blockchain-AI Alignment and Formal Verification}
-
-Recent theoretical works have begun exploring the intersection of AI governance and cryptographic proofs. A notable 2024 study~\cite{aialign2024} proposed using zk-STARKs alongside Proof of Personhood frameworks in post-quantum scenarios. While these theoretical models show conceptual convergence, there is currently a stark absence of rigorous, empirical co-design studies evaluating the joint deployment of PoUI, ZKML, and PQC. Our framework addresses this explicit gap.
-
-%─────────────────────────────────────────────────────────────────────────────
-\section{Trust Score Formalization (RQ1)}
-\label{sec:trustscore}
-
-A robust, AI-native blockchain must accurately and fairly evaluate validator performance. To achieve this, we developed a sophisticated Trust Score model that mathematically binds validator rewards to their honesty, reliability, and computational speed. The structural advantages of our approach over traditional Proof-of-Stake mechanisms are illustrated in Fig.~\ref{fig:pos_vs_poui}.
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\columnwidth]{figures/fig_comparison_pos_poui.png}
-  \caption{Architectural and economic comparison between traditional Proof of Stake (PoS) and the proposed Proof of Useful Intelligence (PoUI) framework.}
-  \label{fig:pos_vs_poui}
-\end{figure}
-
-\subsection{Trust Score Model Definition}
-
-\begin{definition}[Trust Score]
-Let epoch $t \in \mathbb{N}$. The Trust Score of a validator node $v$ at epoch $t$ is defined as:
+\begin{definition}[Trust score]
+For epoch $t\in\mathbb{N}$,
 \begin{equation}
-  T_t = \alpha A_t^2 e^{-\lambda L_t} + \beta \ln U_t - \gamma S_t
+  T_t = \alpha A_t^2 e^{-\lambda L_t} + \beta \ln U_t - \gamma S_t,
   \label{eq:trust}
 \end{equation}
-where $A_t \in [0,1]$ represents the normalized accuracy of the AI inference; $L_t \geq 0$ represents the network latency in milliseconds; $U_t \in [\epsilon_U,1]$ is the cumulative uptime ratio of the node, with $\epsilon_U > 0$ (e.g., $\epsilon_U = 0.1$) serving as a strict protocol-enforced minimum uptime threshold below which a node is instantly slashed; $S_t \in \{0,1\}$ acts as a boolean fraud detection flag; and $\alpha, \beta, \gamma, \lambda > 0$ serve as governance-adjusted weighting coefficients calibrated to avoid degenerate equilibria (e.g., $\lambda$ scaled to average network latency, $\gamma$ set higher than maximum potential rewards).
+with weights $\alpha,\beta,\gamma,\lambda>0$. Experiments use $\alpha=0.5$, $\beta=0.3$, $\gamma=1.5$, $\lambda=0.01$. A node leaves the active set when $T_t < \tau_{\mathrm{excl}}=-0.5$. Implementations should floor $U_t$ at $\epsilon_U>0$ so that $\ln U_t$ is finite; the simulator uses $\max(U_t,10^{-9})$.
 \end{definition}
 
-The mechanics of this equation are designed to strictly enforce network health. The quadratic nature of the accuracy term ($A_t^2$) ensures that validators are heavily incentivized to provide highly accurate, genuine computations. Network responsiveness is enforced via the exponential decay factor ($e^{-\lambda L_t}$), aggressively penalizing high-latency nodes. Finally, the slashing parameter ($\gamma S_t$) serves as an ejection mechanism, mathematically ensuring the rapid removal of identified fraudulent actors.
+\begin{assumption}[Independence and audits]
+\label{ass:ind}
+$A_t$ and $L_t$ are independent. Nearly all honest nodes have $S_t=0$. A forged report with $A_t<\tau$ is slashed independently with probability $p\in(0,1]$; if $A_t\ge\tau$ then $S_t=0$. (The simulator assumes $\tau=0.40$ and $p=0.35$.)
+\end{assumption}
 
-\subsection{Formal Theorems and Proofs}
-
-We present the foundational security theorems governing our Trust Score implementation.
-
-\begin{theorem}[Bounds on $T_t$]
-Given parameter boundaries where $A_t \in [0,1]$, $L_t \geq 0$, $U_t \in [\epsilon_U, 1]$, and $S_t \in \{0,1\}$, the trust score is strictly bounded:
-\begin{equation}
-  \beta \ln \epsilon_U - \gamma \leq T_t \leq \alpha
-\end{equation}
-The absolute upper bound $T_{\max} = \alpha$ is reached precisely when $L_t = 0$, $U_t = 1$, $S_t = 0$, and $A_t = 1$.
+\begin{theorem}[Bounds]
+\label{thm:bounds}
+If $A_t\in[0,1]$, $L_t\ge 0$, $U_t\in[\epsilon_U,1]$, and $S_t\in\{0,1\}$, then
+\[
+  \beta\ln\epsilon_U-\gamma \le T_t \le \alpha.
+\]
+The upper bound is attained at $(A_t,L_t,U_t,S_t)=(1,0,1,0)$. If the protocol enforces $L_t\ge L_{\min}>0$, the bound tightens to $T_t\le\alpha e^{-\lambda L_{\min}}$.
 \end{theorem}
 
 \begin{proof}
-Evaluating the accuracy term yields $\alpha A_t^2 e^{-\lambda L_t} \leq \alpha \cdot 1 \cdot 1 = \alpha$. The uptime term simplifies to $\beta \ln U_t \leq \beta \ln 1 = 0$. The slashing term evaluates as $-\gamma S_t \geq -\gamma$. Combining these elements establishes the maximum possible score: $T_t \leq \alpha + 0 - 0 = \alpha$. Conversely, the lower bound is naturally derived from the strict uptime constraint $\ln U_t \geq \ln \epsilon_U$ and $S_t \leq 1$, preventing the score from diverging to $-\infty$.
+Because $A_t^2\le 1$ and $e^{-\lambda L_t}\le 1$, the accuracy term is at most $\alpha$, with equality only if $A_t=1$ and $L_t=0$. Because $\ln U_t\le\ln 1=0$, the uptime term is at most $0$, with equality only if $U_t=1$. Because $S_t\ge 0$, $-\gamma S_t\le 0$, with equality only if $S_t=0$. Adding these three inequalities yields $T_t\le\alpha$. For the lower bound, the accuracy term is $\ge 0$, $\ln U_t\ge\ln\epsilon_U$, and $-\gamma S_t\ge-\gamma$. If $L_t\ge L_{\min}$, then $e^{-\lambda L_t}\le e^{-\lambda L_{\min}}$, so the first term is at most $\alpha e^{-\lambda L_{\min}}$.
 \end{proof}
 
-\begin{theorem}[Sybil Resistance]
+Write $\phi_L:=\mathbb{E}[e^{-\lambda L_t}]$. Independence in Assumption~\ref{ass:ind} gives $\mathbb{E}[A_t^2 e^{-\lambda L_t}]=\mathbb{E}[A_t^2]\,\phi_L$. We do \emph{not} replace $\phi_L$ by $e^{-\lambda\mathbb{E}[L_t]}$ (Jensen would go the wrong way for the convex map $x\mapsto e^{-\lambda x}$ on $\lambda>0$).
+
+\begin{theorem}[Expected score gap]
 \label{thm:sybil}
-Consider a Sybil entity $\mathcal{S}$ attempting to game the network by submitting fabricated inference outputs with an optimized pseudo-accuracy $A^* < \tau$ (where $\tau$ is the slash detection threshold). Let $p_{\text{detect}} \in (0,1)$ represent the operational detection probability derived from deterministic ZKML proof verification failures combined with periodic spot-checking by auditing nodes. The expected trust score of the Sybil actor is strictly less than that of an honest validator:
+Under Assumption~\ref{ass:ind}, set $U_t=1$ for both kinds and apply the latency law that defines $\phi_L$. Assume an honest node has accuracy $A_H$ and a fabricator reports a (potentially random) $A_F$ with $A_F<\tau$ a.s.\ and $\mathbb{E}[S_F]=p$. Then
 \begin{equation}
-  \mathbb{E}[T_t^{\text{sybil}}] < \mathbb{E}[T_t^{\text{honest}}]
+  \Delta := \mathbb{E}[T_H]-\mathbb{E}[T_F]
+  = \alpha\phi_L\bigl(\mathbb{E}[A_H^2]-\mathbb{E}[A_F^2]\bigr)+\gamma p.
+  \label{eq:gap}
 \end{equation}
-provided the condition $\gamma p_{\text{detect}} > \alpha (A^{*2} - \mathbb{E}[A_{\text{honest}}^2]) e^{-\lambda \bar{L}}$ is met.
+In particular $\Delta>0$ whenever $\gamma p>\alpha\phi_L\bigl(\mathbb{E}[A_F^2]-\mathbb{E}[A_H^2]\bigr)_+$, which holds automatically if $\mathbb{E}[A_H^2]\ge\mathbb{E}[A_F^2]$.
 \end{theorem}
 
 \begin{proof}
-For honest nodes, uptime $U_t \to 1$ and slashing $S_t = 0$, resulting in an expected score of $\mathbb{E}[T_t^{\text{honest}}] = \alpha \mathbb{E}[A_{\text{honest}}^2] e^{-\lambda \bar{L}}$. For the Sybil node, the expected score is $\mathbb{E}[T_t^{\text{sybil}}] = \alpha A^{*2} e^{-\lambda \bar{L}} - \gamma p_{\text{detect}}$. The difference $\mathbb{E}[T^{\text{honest}}] - \mathbb{E}[T^{\text{sybil}}] > 0$ holds true if and only if $\gamma p_{\text{detect}} > \alpha(A^{*2} - \mathbb{E}[A_{\text{honest}}^2])e^{-\lambda \bar{L}}$. Based on empirical network parameters ($\gamma = 1.5$, $p_{\text{detect}} = 0.35$, $A^* = 0.39$), this gap remains significantly positive ($0.725 > 0$). \qed
+$\mathbb{E}[T_H]=\alpha\mathbb{E}[A_H^2]\phi_L$ because $S_H=0$ and $\ln 1=0$. $\mathbb{E}[T_F]=\alpha\mathbb{E}[A_F^2]\phi_L-\gamma p$. Subtract.
 \end{proof}
 
-\begin{theorem}[Non-Gameability]
+Splitting into $k$ identities doesn't increase the per identity expectation in~\eqref{eq:gap}. Score weighted selection therefore does not reward Sybil copies of a low $T$ fabricators. This theorem does not apply to one identity one vote systems with no score or stake/identity cost.
+
+The experimental weights, $\phi_L=\mathbb{E}[e^{-0.01 L}]$ for $L\sim\mathcal{N}(50,10^2)$ truncated at $1$, $\mathbb{E}[A_H^2]\approx 0.90^2+0.05^2=0.8125$ (unclipped Gaussian), and a constant probe $A_F=0.39$, one gets $\Delta\approx 0.73$. The simulator is easier for the defender: $A_F\sim\mathrm{Unif}[0.10,0.30]$ so $\mathbb{E}[A_F^2]=(0.10^2+0.10\cdot 0.30+0.30^2)/3=0.0433$.
+
+\begin{theorem}[Unique maximizer of the one shot payoff]
 \label{thm:game}
-For a rational, utility-maximizing validator, the unique Nash equilibrium strategy to maximize their expected score $\mathbb{E}[T_t]$ is to execute and submit genuine, highly accurate AI inference outputs.
+Fix $L_t$ and $U_t$, and let $\mathbb{E}[S_t\mid A]=p\cdot\mathbf{1}[A<\tau]$ as in Assumption~\ref{ass:ind}. Define $g(A)=\alpha A^2 e^{-\lambda L_t}+\beta\ln U_t-\gamma p\cdot\mathbf{1}[A<\tau]$ for $A\in[0,1]$. If $\tau\in(0,1]$ and $p,\alpha,\gamma>0$, then $g$ has a unique maximizer at $A=1$.
 \end{theorem}
 
 \begin{proof}
-An adversarial validator faces the optimization problem: $\max_{A_t \in [0,1]} \alpha A_t^2 e^{-\lambda L_t} + \beta \ln U_t - \gamma \mathbb{E}[S_t(A_t)]$. The accuracy component is strictly increasing and convex with respect to $A_t$. The expected slashing penalty $\mathbb{E}[S_t(A_t)]$ operates as a step function: $p_{\text{detect}} \cdot \mathbf{1}[A_t < \tau] + 0 \cdot \mathbf{1}[A_t \geq \tau]$, which introduces a massive discontinuity at the threshold $A_t = \tau$. Because the derivative $\frac{d}{dA_t}[\alpha A_t^2 e^{-\lambda L_t}] = 2\alpha A_t e^{-\lambda L_t}$ is strictly positive, the expected score consistently climbs as $A_t$ exceeds $\tau$. To compute $A_t$ securely and prevent input cherry-picking, the network utilizes a "Commit-Reveal Hidden Gold-Standard" mechanism. A small fraction of user inputs are verifiable ground-truth queries injected securely by auditors via ML-KEM confidential channels. $A_t$ is evaluated strictly on these concealed inputs. Consequently, the global maximum for $\mathbb{E}[T_t]$ across the interval $[0,1]$ is firmly anchored at $A_t = 1$, a state uniquely achievable via genuine computation across all inputs. \qed
+Let $c:=\alpha e^{-\lambda L_t}>0$ and $b:=\beta\ln U_t$, so $g(A)=cA^2+b-\gamma p$ on $[0,\tau)$ and $g(A)=cA^2+b$ on $[\tau,1]$. Since $\tau\le 1$, $g(1)=c+b$. For any $A<1$ we have $cA^2<c$, hence $g(A)<c+b-\gamma p\,\mathbf{1}[A<\tau]\le c+b=g(1)$. Every $A<1$ is therefore strictly worse than $A=1$.
 \end{proof}
 
-\begin{theorem}[Convergence Rate]
-\label{thm:convergence}
-Let $\mu_{\text{mal}} = \mathbb{E}[T_t^{\text{mal}}]$ represent the expected score of a malicious node, with an exclusion threshold of $\tau_{\text{excl}} = -0.5$. Assuming $T_i$ are independent variables strictly bounded within $[T_{\min}, T_{\max}]$ (as established in Theorem 1, with range $R = T_{\max} - T_{\min}$), Hoeffding's Inequality bounds the probability of expelling a malicious node by epoch $k$ without requiring distributional assumptions:
-\begin{equation}
-  P\!\left(\sum_{i=1}^k T_i < \tau_{\text{excl}}\right) \geq
-  1 - \exp\!\left(-\frac{2 (k\mu_{\text{mal}} - \tau_{\text{excl}})^2}{k R^2}\right)
-\end{equation}
-Employing our standard simulation parameters ($\mu_{\text{mal}} = -0.512$, range $R \approx 2.5$), the network mathematically guarantees a high probability ($>95\%$) of excluding the malicious actor by the $8^{\text{th}}$ epoch.
+This is a single agent optimization rather than a Nash equilibrium in a repeating game with stakes or collusion. The simulator does not have a channel for measuring Real At on hidden probes, such as ML-KEM-wrapped gold standard inputs.
+
+\begin{lemma}[One slash suffices]
+\label{lem:slash}
+Assume $U_t=1$, $\tau_{\mathrm{excl}}<0$, and $\gamma>\alpha-\tau_{\mathrm{excl}}$. Then $S_t=0$ implies $T_t\ge 0>\tau_{\mathrm{excl}}$ (using $A_t^2 e^{-\lambda L_t}\ge 0$), while $S_t=1$ implies $T_t\le\alpha-\gamma<\tau_{\mathrm{excl}}$. Thus exclusion occurs if and only if $S_t=1$.
+\end{lemma}
+
+The experimental numbers, $\alpha-\tau_{\mathrm{excl}}=1.0$ and $\gamma=1.5>1.0$, so the lemma applies.
+
+\begin{theorem}[Geometric exclusion time]
+\label{thm:geom}
+Assuming a malicious node has $A_t<\tau$ every epoch,  each epoch represents a separate slash trial with success probability $p$. Let $M$ be the first epoch, and $S_t=1$. Lemma~\ref{lem:slash}, state that $M$ is the exclusion epoch, $M\sim\mathrm{Geometric}(p)$ on $\{1,2,\ldots\}$, $\mathbb{E}[M]=1/p$, and
+\[
+  \Pr(M\le k)=1-(1-p)^k.
+\]
 \end{theorem}
 
-\subsection{Simulation Environment}
-To empirically validate the Trust Score dynamics and exclusion convergence, we developed a simulation environment of $N=100$ validator nodes processing a continuous stream of AI inference tasks (MobileNetV2 on CIFAR-10). The latency $L_t$ was modeled via a log-normal distribution simulating a geographically dispersed network. Malicious actors were programmed to systematically inject errors with $A^* = 0.39$, triggering operational detection ($p_{\text{detect}} = 0.35$) via periodic ZKML proof auditing. We compared our PoUI framework against a traditional PoS baseline utilizing standard capital-weighted stake slashing. Under identical conditions, the PoS baseline achieved an exclusion rate of only $\sim$3.67\% for stealthy data-poisoning attacks (due to the difficulty of subjective peer voting), whereas the PoUI model successfully attained a 100\% malicious exclusion rate via its deterministic slashing equations.
+\begin{proof}
+Assumption~\ref{ass:ind} states that trials are independent, hence $P(M>k)=(1-p)^k$. Lemma~\ref{lem:slash} identifies $\{M\le k\}$ and excludes epoch $k$.
+\end{proof}
 
-%─────────────────────────────────────────────────────────────────────────────
-\section{ZKML Circuit Security (RQ2)}
+For $p=0.35$, $\mathbb{E}[M]\approx 2.86$ and $\Pr(M\le 8)=1-0.65^8\approx 0.968$. Section~\ref{sec:sim} includes Monte Carlo analysis alongside this prediction.
+
+\section{Protocol Sketch}
+\label{sec:protocol}
+
+The score is only meaningful if $A_t$ is linked to a specific challenge and model. During registration, validators record stake, ML-DSA verification key, ML-KEM encryption key, and commitment to the authorized model/version. For epoch $t$, a coordinator generates a nonce from the previously finalized block, encrypts a hidden labeled probe with the validator's ML-KEM key, and commits to $(t,\mathrm{id},\mathrm{nonce},\mathrm{model})$. The validator returns $(y,\pi)$, signs $H(t\parallel\mathrm{model}\parallel\mathrm{commitment}\parallel y\parallel H(\pi))$, and submits it by the deadline. Verifiers evaluate the epoch binding, signature, model commitment, circuit proof, and hidden label score before updating $T_t$.
+
+This flow prevents simple replay and model substitution only if the circuit binds the challenge, model, quantization parameters, and output. It does not describe leader election, finality, dispute resolution, or an incentive compatible stake mechanisms, with must be provided by the underlying consensus protocol. The full message level specification and deployment boundary are in the companion \texttt{protocol\_spec.md}.
+
+\section{Simulation}
+\label{sec:sim}
+
+\paragraph{Setup}
+$N=100$ nodes (70 honest, 15 high latency, and 15 malicious). The horizon spans 1{,}000 epochs. We evaluated the fixed seed 42 and the ten seed set provided below: \texttt{simulation/run\_multiseed.py} replicates that aggregate. The accuracy is $\mathcal{N}(0.90,0.05^2)$ clipped to $[0,1]$, the latency is $\mathcal{N}(50,10^2)$\,ms, leveled at 1\,ms, and high latency nodes add $3\times10$\,ms. Malicious accuracy is $\mathrm{Unif}[0.10,0.30]$. Slash probability is $0.35$ for malicious nodes with $A_t<0.40$. Uptime stays near 1 because nodes are not presented as crashing, so the $\ln U_t$ term is almost inactive.
+
+\paragraph{PoUI outcome}
+On seed 42, all 15 malicious nodes were excluded (mean epoch $2.53$, min $1$, max $8$), whereas no honest node was excluded. Repeating the sample process on ten seeds $\{42,7,13,99,123,256,512,1024,2024,31415\}$ consistently removed $15/15$ malicious nodes every time and $0$ honest nodes. The mean of the ten per seed exclusion means was $3.12$ (sample standard deviation $0.71$), compared to the analytical prediction $\mathbb{E}[M]=1/0.35\approx2.86$. A two sided 95\% $t$ interval for the mean of the 10 per seed is $[2.61,3.63]$, which matches the prediction. The simulation serves as a sanity check for the stated audit model, but dose not provide independent security validation due to its implementation in the data creation process.
+
+\paragraph{Sensitivity} The companion calculation considers audit probability and false positive rate. For $p\in\{0.10,0.20,0.35,0.50,0.75\}$, the estimated exclusion times are $\{10,5,2.86,2,1.33\}$ epochs. With one slash exclusion, a per epoch false positive rate of $10^{-3}$ result in an honest validator probability $1-(1-10^{-3})^{1000}\approx0.632$ for at least one incorrect slash every 1{,}000 epochs. A deployable procedure requires calibrated detection plus repeated evidence, an appeal process, or a less brittle slash rule. The zero false positive simulator is intentionally optimistic.
+
+\paragraph{Baseline}
+We also used a stake weighted committee with 10 nodes each epoch. To remove malicious members, a Bernoulli trial with $p=0.02$ is required at each epoch (a toy vote). On seed 42, 13 out of 15 malicious nodes (86.7\%)  were successfully deleted, with an average epoch of $568$. Automatic slash is faster than the straw procedure. This is not a comparison to Ethereum or other live proof of stake protocols.
+
+\paragraph{What was not simulated}
+The simulation did not involve training or evaluating any neural networks. There were no packets delivered, and latency is a scalar draw, not a network topology.
+Section ~\ref{sec:zkml} reports on a simple ZKML proof pipeline test.
+
+\section{ZKML Circuit Checklist}
 \label{sec:zkml}
 
-While the PoUI scoring mechanism ensures economic alignment, the cryptographic verification of the AI computation depends entirely on the soundness of Zero-Knowledge Machine Learning (ZKML) circuits. If a circuit is underconstrained, a prover can theoretically forge valid proofs for incorrect outputs.
-
-\subsection{Circuit Soundness Definition}
-
-\begin{definition}[ZKML Circuit Soundness]
-Let $\mathcal{C}$ be a ZKML circuit encoding a neural network function $f: \mathbb{R}^n \to \mathbb{R}^m$. The circuit is considered \emph{sound} if and only if the verification of the proof mathematically guarantees the output corresponds to the true function:
+If a later implementation utilizes a circuit $\mathcal{C}$ for $f:\mathbb{R}^n\to\mathbb{R}^m$, soundness in usually defined as
 \[
-  \forall (x, y, \pi): \text{Verify}(\mathcal{C}, x, y, \pi) = 1 \implies y = f(x)
+  \mathrm{Verify}(\mathcal{C},x,y,\pi)=1 \implies y=f(x).
 \]
-\end{definition}
+Pailoor et al.\  found that many genuine circuits allow for extra witnesses~\cite{pailoor2023pldi}. When using a PoUI verifier, it's crucial to ensure that the given score aligns with the model, input, and inference semantics, rather than simply having a proof. The following five conditions address the question of common inference gadgets. The design requirements are based on literature and circuit semantics, we did not compile EZKL circuits or generate exploit traces. 
 
-\subsection{Vulnerability Taxonomy in PoUI Context}
-
-To secure the network against advanced forgery, we established the first formal taxonomy of underconstrained circuit vulnerabilities specific to blockchain validators. This taxonomy is visualized in Fig.~\ref{fig:zkml_taxonomy}.
-
-\begin{figure}[htbp]
+\begin{figure}[t]
   \centering
-  \includegraphics[width=\columnwidth]{figures/fig_zkml_taxonomy.png}
-  \caption{Taxonomy of underconstrained ZKML circuit vulnerabilities tailored to adversarial blockchain validator environments.}
+  \includegraphics[width=\columnwidth]{figures/fig_zkml_taxonomy.jpg}
+  \caption{Five circuit soundness requirements for a PoUI inference verifier.}
   \label{fig:zkml_taxonomy}
 \end{figure}
 
-The five core vulnerability classes we identified are:
+\textbf{V-I Range.} An explicit range proof $w\in[0,2^k-1]$ (or a similar lookup) is required for ReLU, sigmoid, and $k$-bit quantized wires. Without it, a prover can use out of range activations to fulfill the polynomial equations.
 
-\textbf{V-I (Under-Range Constraint, URC):}
-This occurs when internal activation wires lack strict range-check gates. An adversarial prover can assign arbitrary out-of-domain values that satisfy the equations but violate the intended network logic. It predominantly affects non-linear activations like ReLU, Sigmoid, and int8-quantized Softmax layers. 
-\textit{Mitigation:} Every wire $w$ must be explicitly decomposed into $k$ bits, with a rigid constraint asserting $w \in [0, 2^k-1]$.
+\textbf{V-II Witness choice.} ArgMax, TopK, and tied softmax scores can admit more than one legal index. To force a total order, use the formula \ $\ell[i^*]\ge\ell[j]+\epsilon$ for all $j\neq i^*$.
 
-\textbf{V-II (Non-Deterministic Witness Assignment, NDWA):}
-Certain operations allow multiple valid witness assignments for the identical input array, resulting in divergent valid outputs. This is particularly dangerous in ArgMax, TopK, and tie-breaking scenarios within Softmax.
-\textit{Mitigation:} Circuit designers must enforce strict logical ordering, proving $\ell[i^*] \geq \ell[j] + \epsilon$ for all index values $j \neq i^*$.
+\textbf{V-III Layer skip.} If only the I/O relation is limited, intermediate activations can be created. Require $h_{k+1}=f_k(h_k)$ per layer (or similar residual identity).
 
-\textbf{V-III (Missing Intermediate Constraint, MIC):}
-If layer-to-layer transition correctness is not cryptographically enforced, an attacker can bypass entire computational blocks (layer-skipping attacks).
-\textit{Mitigation:} We mandate dedicated per-layer sub-circuits that continuously assert the transition $h_{k+1} = f_k(h_k)$.
+\textbf{V-IV Quantization slack.} Instead of being left as provider-selected slack that traverses logits over a decision boundary, scale $s$ and zero point $z$ must be bound in the instance (or in a commitment).
 
-\textbf{V-IV (Floating-Point Approximation Exploit, FPAE):}
-Adversaries can exploit the rounding and truncation logic inherent in quantization parameters to systematically drift logit values while remaining within the circuit's error tolerance bounds.
-\textit{Mitigation:} Scale $s$ and zero-point $z$ parameters must be formally committed to the on-chain registry and verified within the circuit proof.
+\textbf{V-V Wrong model.} The circuit must open a commitment $H(\theta)$ to the actual weights used. Otherwise, the prover proves another network, $f_{\theta'}$.
 
-\textbf{V-V (Commitment-Output Mismatch, COM):}
-The system fails if the circuit proves a valid computation using an arbitrary model rather than the specific model mandated by the consensus protocol.
-\textit{Mitigation:} The circuit must explicitly assert that the Merkle root of the utilized weights precisely matches the on-chain model commitment $H(\theta)$.
+These are necessary device level inspections.
+To ensure a compiler's soundness, future implementations should verify the backend, quantization technique, and model graph.
 
-%─────────────────────────────────────────────────────────────────────────────
-\section{Post-Quantum Cryptography Benchmarks (RQ3)}
+\paragraph{EZKL smoke test}
+To ensure the suggested proof interface is executable, we created a deterministic ONNX model $\mathrm{Gemm}(2\times2)\to\mathrm{ReLU}$, generated a witness, then produced and verified a proof with EZKL 23.0.5. On an Intel Core i3 1005G1 laptop, proving took 6.91\,seconds, verification 27.5\,milliseconds, and the proof JSON size was 17{,}790 bytes. The test uses a locally produced SRS and a small model, making it a toolchain smoke test rather than a security or performance benchmark. The objective is to show that IC-01/IC-02 (Section~\ref{sec:codesign}) may be instantiated, but it does not validate the five checklist elements for a production compiler or model.
+
+\section{Post Quantum Sizing}
 \label{sec:pqc}
+% TODO(authors): see REVIEW_NOTES section A. EZKL's Halo2/KZG backend is not post-quantum, and proof bytes are not budgeted next to signature bytes here.
 
-Transitioning a blockchain to utilize quantum-safe cryptography inevitably incurs substantial data and processing overheads. We conducted extensive benchmarks of NIST's standardized ML-DSA and ML-KEM algorithms to evaluate their impact on AI-intensive consensus throughput. The resulting latency and throughput impacts are charted in Fig.~\ref{fig:pqc_benchmarks}.
+Table~\ref{tab:pqc_sizes} reports byte sizes from FIPS 204 Table~2~\cite{nistfips204}, alongside Ed25519~\cite{rfc8032} and ECDSA-P256~\cite{nistfips1865}. This is a sizing calculation, not a timing benchmark.
 
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\columnwidth]{figures/fig_pqc_benchmarks.png}
-  \caption{Throughput and latency benchmarks for integrating Post-Quantum Cryptography (ML-DSA and ML-KEM) within the consensus layer.}
-  \label{fig:pqc_benchmarks}
-\end{figure}
-
-Table~\ref{tab:pqc_sizes} details the dramatic increase in signature and key footprints when migrating from classical elliptic curve cryptography to lattice-based post-quantum algorithms.
-
-\begin{table}[htbp]
-\caption{Signature and Key Sizes: Classical Cryptography vs.\ ML-DSA (FIPS 204)}
+\begin{table}[t]
+\caption{Key and signature sizes. ML-DSA rows: FIPS 204 Table~2~\cite{nistfips204}, Ed25519: RFC 8032~\cite{rfc8032}, ECDSA-P256: 256 bit curve~\cite{nistfips1865}. Amplification is signature bytes divided by 64 (Ed25519).}
 \label{tab:pqc_sizes}
 \centering
 \begin{tabular}{@{}lrrrrl@{}}
 \toprule
-Cryptographic Scheme & PK (B) & SK (B) & Sig (B) & Amp$\times$ & Q-Safe \\
+Scheme & PK (B) & SK (B) & Sig (B) & Amp. & Q-safe \\
 \midrule
-Ed25519    & 32   & 64   & 64   & 1.0$\times$ & No  \\
-ECDSA-P256 & 64   & 32   & 64   & 1.0$\times$ & No  \\
-\midrule
-ML-DSA-44  & 1312 & 2560 & 2420 & 37.8$\times$ & Yes \\
-ML-DSA-65  & 1952 & 4032 & 3293 & 51.5$\times$ & Yes \\
-ML-DSA-87  & 2592 & 4896 & 4595 & 71.8$\times$ & Yes \\
+Ed25519    & 32   & 32   & 64   & $1.0\times$ & no \\
+ECDSA-P256 & 64   & 32   & 64   & $1.0\times$ & no \\
+ML-DSA-44  & 1312 & 2560 & 2420 & $37.8\times$ & yes \\
+ML-DSA-65  & 1952 & 4032 & 3309 & $51.7\times$ & yes \\
+ML-DSA-87  & 2592 & 4896 & 4627 & $72.3\times$ & yes \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Our benchmarking across a simulated network of $N=100$ validators running a strict 1-second BFT block time yielded critical insights regarding \textbf{ML-DSA-44} (NIST Security Level 2):
-\begin{itemize}
-  \item \textbf{CPU Verification Overhead:} Total verification consumed 8.30\,ms, which remains highly competitive against the 13.0\,ms baseline of verifying 100 separate Ed25519 signatures.
-  \item \textbf{Bandwidth Implication:} A naive implementation inflates block size by 355\,KB/block purely from consensus signatures. By employing Merkle-ized signature attestations or STARK-based proof aggregation (Mitigation M1), this bloat is successfully compressed to 202\,KB.
-  \item \textbf{Scalability:} Because this specific signature overhead is scoped to the BFT consensus layer (scaling with $N$, not with transactions), ML-DSA-44 overhead per block remains constant and is fully feasible across demanding throughput targets ranging from 100 up to 10{,}000 TPS.
-\end{itemize}
+For a 100 validator committee, each ML-DSA-44 signature takes up $100\times2420=242{,}000$ bytes (about $236$\,KiB) before transaction encoding and ignoring ZK proofs. This creates a lower bound payload computation. Because aggregation, such as a Merkle batch or recursive proof, alters the protocol, we cannot make any claims about measured block size or throughput in this work.
+The protocol uses ML-KEM-768 to encapsulate $A_t$'s hidden probe inputs. This study does not address encapsulation times.
 
-Simultaneously, \textbf{ML-KEM-768} (NIST Security Level 3) demonstrated exceptional performance for epoch-level key encapsulation, requiring only 43\,$\mu$s for encapsulation and 39\,$\mu$s for decapsulation. Crucially, blockchains predominately require signatures rather than KEMs; however, within our co-design, ML-KEM is explicitly utilized to establish the confidential channels necessary for securely distributing the hidden gold-standard inputs utilized in the Trust Score computation.
-
-%─────────────────────────────────────────────────────────────────────────────
-\section{Architectural Co-Design and Interaction (RQ4, RQ5)}
+\section{Layer Contracts}
 \label{sec:codesign}
 
-Evaluating PoUI, ZKML, and PQC independently fails to capture the complex interdependencies that emerge when they operate in concert. We modeled the holistic system architecture to highlight these structural interfaces (see Fig.~\ref{fig:architecture}).
+Figure~\ref{fig:architecture} is a requirements diagram, not a running stack. It specifies where future implementations must share data and enforce deadlines.
 
-\begin{figure}[htbp]
+\begin{figure}[t]
   \centering
   \includegraphics[width=\columnwidth]{figures/fig_architecture.png}
-  \caption{Holistic co-design architecture illustrating the integration of PoUI trust mechanisms, ZKML proof verification, and PQC security layers.}
+  \caption{Challenge proof score requirements and deployment risks for a future PoUI implementation.}
   \label{fig:architecture}
 \end{figure}
 
-\subsection{Formal Interface Contracts (RQ4)}
+IC-01 (L1$\to$L2): Request a proof of $y=f_\theta(x)$ under commitment $H(\theta)$, with an example budget of $5$ seconds and around $200$ KB.
+Failures include timeout, underconstrained accept, and out of memory.
 
-To ensure rigorous system stability, we codified four distinct interface contracts (IC-01 through IC-04) that dictate the bidirectional communication between the PoUI, ZKML, and PQC layers. Each contract strictly defines expected pre-conditions, input and output types, latency thresholds, and explicit failure fallback states. 
-Crucially, the timing constraints for the combined epoch inference verification are bound by a latency budget:
-\[
-  t_{\text{epoch\_verification}} \geq t_{\text{prove}} + t_{\text{sign}} + t_{\text{network}} \approx 5000 + 0.195 + 100 = 5100.2\,\text{ms}
-\]
-The $\sim$5\,s proving time ($t_{\text{prove}}$) assumes highly quantized, small models (e.g., MobileNet on EZKL). Ensuring $t_{\text{epoch\_verification}}$ remains safely above this threshold is critical. For larger models, this necessitates decoupling inference from the rapid 1-second PQC block consensus via an asynchronous commit-reveal proving pipeline to prevent network desynchronization.
+IC-02 (L2$\to$L1): submit $(y,\pi)$ with an ML-DSA signature on $H(\pi)$. Failures: late slot, poor signature, verifier reject $\Rightarrow S_t=1$.
 
-\subsection{Emergent Security Properties (RQ5)}
+IC-03 (L1$\to$L3): register an ML-DSA key, bootstrap cannot occur on a classical only channel if harvest now decrypt later is in scope.
 
-The simultaneous integration of these three disciplines yields novel security properties that transcend their individual capabilities:
+IC-04 (L3$\to$L2): verification keys overlap for one epoch, allowing proofs initiated under key $k$ can still be checked after rotation.
 
-\textbf{ESP-1 (Proof-of-Identity Chain):}
-Applying Layer 3 post-quantum signatures directly to the Layer 2 ZKML proof hashes establishes an unbroken, cryptographically undeniable linkage from the validator's identity directly to the evaluated network state: $\text{validator\_id} \to \theta \to f_\theta(x)$. This guarantees absolute non-repudiation of AI outputs on-chain.
+EZKL class proving times for small quantized models are measured in seconds rather than sub-seconds~\cite{ezkl2024}. A one second BFT slot cannot simultaneously wait for such a proof. The $5$\,s budget is simply an example, a protocol should be tailored to its own model and hardware. The design implies asynchronous commit     reveal, where a commitment might be proposed in slot $s$ and the evidence opened later. Without the pipeline, slots may skip (FM-CD-1), and without a key overlap window, in flight proofs may fail during rotation (FM-CD-2). A classical only bootstrap can compromise long term confidentiality (FM-CD-3), whereas individual PQC signatures and raw proofs may exceed a block budget (FM-CD-4).
 
-\textbf{ESP-2 (Quantum-Safe AI Governance):}
-A holistic security perimeter is formed where ML-DSA nullifies identity forgery, ZKML soundness negates computation forgery, and the Trust Score prevents economic manipulation. This creates a unified governance mechanism robust against both current rational adversaries and future quantum threats.
 
-\textbf{ESP-3 (Layered Slash Amplification):}
-Because ZKML proofs generate immutable cryptographic evidence of computation, any slashing decision executed via the Trust Score formula ($S_t = 1$) is mathematically irrefutable. Validators cannot contest a penalty if their ZKML proof mathematically contradicts the on-chain consensus.
+Signing the proof hash with the validator key (ESP-1) results in regular non repudiation: $\mathrm{id}\to H(\pi)\to (x,y)$. This does not necessarily show that $\mathcal{C}$ was sound. Slashing on verifier reject (ESP-3) is only as fair as the circuit.
 
-\subsection{Co-Design Failure Modes (RQ5)}
+\section{Limitations}
+\label{sec:limits}
 
-Conversely, combining these systems introduces acute operational vulnerabilities:
+N equals $100$, and ten seeds are little. Detection is a coin flip with no false positives, uptime is consistent, and the vote baseline is illustrative, not a proof of stake model. The ZKML smoke test is limited to a single device with a local test SRS and does not cover all EZKL, Halo2, or Groth16 devices. Theorem~\ref{thm:game} is one shot, but Lemma~\ref{lem:slash} requires $U_t=1$. The PQC discussion uses standard byte sizes rather than locally measured cryptographic operations. The research makes an analytical feasibility assertion rather than a deployment performance claim because of these boundaries.
 
-\textbf{FM-CD-1 (Proving-Slot Race):}
-The combined computational weight of generating ZKML proofs (often approaching 5\,s), post-quantum signing ($\approx 0.2$\,ms), and network propagation must fit precisely within a single consensus slot. Delays inevitably trigger slot-skipping. \textit{Mitigation:} We prescribe an asynchronous pre-computation pipeline.
-
-\textbf{FM-CD-2 (Key Rotation Desync):}
-As ML-DSA enforces mandatory epoch-based key rotations at Layer 3, these shifts can inadvertently invalidate long-running ZKML proofs processing at Layer 2. \textit{Mitigation:} Implementation of a mandatory one-epoch grace verification window within contract IC-04.
-
-\textbf{FM-CD-3 (Bootstrap Paradox):}
-If initial ML-KEM key registrations are transmitted over classical channels, adversaries can perform "harvest-now-decrypt-later" attacks on the network genesis state. \textit{Mitigation:} Bootstrapping sequences must strictly utilize PQC-hybrid TLS tunnels.
-
-\textbf{FM-CD-4 (Size Budget Overflow):}
-A naive, unoptimized co-design deployment generates massive chain bloat, producing up to 20.24\,MB/block at a modest network size ($N=100$). \textit{Mitigation:} Aggressive implementation of M1 aggregate signatures paired with zero-knowledge proof compression shrinks this footprint back to a sustainable $\leq 202$\,KB/block.
-
-%─────────────────────────────────────────────────────────────────────────────
-\section{Discussion and Limitations}
-\label{sec:discussion}
-
-While this framework establishes a rigorous foundation for AI-native consensus, certain limitations must be acknowledged. First, our Trust Score simulations were restricted to $N=100$ nodes; expanding this modeling to large-scale networks ($N=500+$) is a critical next step to verify broader economic dynamics. Second, our post-quantum benchmarking relied on well-established SUPERCOP and NIST specifications; however, we are currently executing hardware-level liboqs validations to ensure real-world parity. Finally, our proof-of-concept exploits for the ZKML vulnerability taxonomy specifically targeted EZKL-compiled architectures. Other prominent proof backends, such as Halo2 or PLONK, may present distinct structural vulnerability profiles that warrant dedicated investigation.
-
-%─────────────────────────────────────────────────────────────────────────────
 \section{Conclusion}
 \label{sec:conclusion}
 
-This paper has presented the first unified, formally grounded architectural blueprint integrating Proof of Useful Intelligence consensus, Zero-Knowledge Machine Learning security, and Post-Quantum Cryptography into a cohesive, AI-native blockchain framework. Our findings indicate that the developed Trust Score model provides robust, mathematically proven Sybil resistance and predictably ejects malicious nodes within 8 epochs. Furthermore, by defining a five-class taxonomy of ZKML vulnerabilities specific to the validator context, we provide the necessary constraints to prevent systemic proof forgery. We have also demonstrated that transitioning to post-quantum standards, specifically ML-DSA-44, is highly feasible for high-throughput networks when paired with appropriate signature aggregation mitigations. Ultimately, this research highlights that the true strength of an AI-native blockchain emerges from careful co-design, exposing unique security synergies and critical failure modes that single-layer analyses overlook. 
+This paper clarifies the minimum evidence chain required for a PoUI consensus design: an auditable score, a challenge proof score flow, a circuit that binds the claimed output to the prescribed model, and a cryptographic payload that fits the protocol budget. Under the stated independent audit model, the trust score analysis predicts geometric exclusion and the Monte Carlo is consistent with that prediction. A small EZKL proof demonstrates the selected tool chain, while the sensitivity calculation shows why false positive handling cannot be omitted. The next stage prototype must implement hidden probe delivery, a ceremony derived SRS, a nontrivial compiled circuit, and measured PQC operations before it can make end to end security or performance claims.
 
-%─────────────────────────────────────────────────────────────────────────────
+
+Code and figure scripts: the companion repository for this manuscript.
+
 \bibliographystyle{IEEEtran}
 \bibliography{references}
 
 \end{document}
+

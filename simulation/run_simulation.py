@@ -51,13 +51,13 @@ def gini_coefficient(scores: np.ndarray) -> float:
     return float((2 * (index * scores).sum()) / (n * scores.sum()) - (n + 1) / n)
 
 
-def run_simulation(verbose: bool = True) -> Dict[str, Any]:
+def run_simulation(seed: int = RANDOM_SEED, verbose: bool = True) -> Dict[str, Any]:
     """
     Run the full PoUI Trust Score simulation.
 
     Returns a results dictionary with all raw data and summary statistics.
     """
-    rng = np.random.default_rng(RANDOM_SEED)
+    rng = np.random.default_rng(seed)
     config = NodeConfig()
 
     # ── Instantiate nodes ────────────────────────────────────────────────────
@@ -160,7 +160,7 @@ def run_simulation(verbose: bool = True) -> Dict[str, Any]:
             "n_honest": N_HONEST,
             "n_high_latency": N_HIGH_LATENCY,
             "n_malicious": N_MALICIOUS,
-            "random_seed": RANDOM_SEED,
+            "random_seed": seed,
             "elapsed_seconds": round(elapsed_total, 3),
         },
         "malicious_exclusion": {

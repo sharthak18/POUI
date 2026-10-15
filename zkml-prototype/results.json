@@ -1,0 +1,39 @@
+{
+  "scope": "One deterministic affine-ReLU ONNX model; local EZKL proof/verification smoke test, not a benchmark. The SRS is locally generated for testing and must not be used by a deployed protocol.",
+  "toolchain": {
+    "ezkl": "23.0.5",
+    "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+    "platform": "Linux-7.0.0-31-generic-x86_64-with-glibc2.39"
+  },
+  "model": {
+    "architecture": "Gemm(2x2) -> ReLU",
+    "input": [
+      [
+        0.25,
+        -0.75
+      ]
+    ]
+  },
+  "proof_created": true,
+  "proof_verified": true,
+  "timings_seconds": {
+    "settings_s": 0.008696,
+    "calibration_s": 0.110719,
+    "compile_s": 0.001496,
+    "srs_s": 12.387634,
+    "witness_s": 0.002914,
+    "setup_s": 7.456452,
+    "prove_s": 6.907923,
+    "verify_s": 0.027493
+  },
+  "artifact_bytes": {
+    "tiny_mlp.onnx": 199,
+    "settings.json": 2097,
+    "tiny_mlp.ezkl": 1815,
+    "witness.json": 913,
+    "kzg.srs": 4194564,
+    "vk.key": 66823,
+    "pk.key": 138479371,
+    "proof.json": 17790
+  }
+}

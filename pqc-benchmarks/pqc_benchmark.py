@@ -87,7 +87,7 @@ SCHEMES: Dict[str, SchemeProfile] = {
     "ML-DSA-65": SchemeProfile(
         name="ML-DSA-65 (Dilithium3)", category="PQC-DSA",
         security_level=3, key_bits=192,
-        public_key_bytes=1952, secret_key_bytes=4032, signature_bytes=3293,
+        public_key_bytes=1952, secret_key_bytes=4032, signature_bytes=3309,
         shared_secret_bytes=0,
         keygen_us=156.0, sign_us=309.0, verify_us=122.0,
         standard="FIPS 204 (2024)", quantum_safe=True,
@@ -95,7 +95,7 @@ SCHEMES: Dict[str, SchemeProfile] = {
     "ML-DSA-87": SchemeProfile(
         name="ML-DSA-87 (Dilithium5)", category="PQC-DSA",
         security_level=5, key_bits=256,
-        public_key_bytes=2592, secret_key_bytes=4896, signature_bytes=4595,
+        public_key_bytes=2592, secret_key_bytes=4896, signature_bytes=4627,
         shared_secret_bytes=0,
         keygen_us=204.0, sign_us=431.0, verify_us=164.0,
         standard="FIPS 204 (2024)", quantum_safe=True,
