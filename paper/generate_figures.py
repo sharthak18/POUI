@@ -164,44 +164,47 @@ print(f"Saved: {out_dir}/fig_pqc_benchmarks.png")
 # ═══════════════════════════════════════════════════════════════════
 # FIGURE 2: ZKML Design Checklist Visual
 # ═══════════════════════════════════════════════════════════════════
-fig2, ax = plt.subplots(figsize=(4.0, 4.8), facecolor=BG)
+# Use a compact row layout so the checklist remains legible without
+# consuming most of a column in the IEEE two-column paper.
+fig2, ax = plt.subplots(figsize=(4.0, 3.0), facecolor=BG)
 ax.set_facecolor(BG)
 ax.axis("off")
 ax.set_aspect("auto")
 ax.set_position([0.0, 0.0, 1.0, 1.0])
 fig2.suptitle("ZKML Circuit Review Checklist\n"
-              "Questions for Future Implementations",
-              fontsize=11, fontweight="bold", color=TXT_H)
+              "Five questions for future implementations",
+              fontsize=10.5, fontweight="bold", color=TXT_H)
 
 checklist_data = [
-    ("V-I", "Range", "Bounded values:\nrange-checked under\nfield encoding?", C_MAL),
-    ("V-II", "Ties", "Are ArgMax/TopK ties\ndefined and enforced?", C_AMBER),
-    ("V-III", "Layers", "Does each layer follow\nits specified relation?", C_PURPLE),
-    ("V-IV", "Quantization", "Are scale, rounding,\nclipping, overflow fixed?", "#79c0ff"),
-    ("V-V", "Model", "Are weights tied to\nauthorized model version?", C_MAL),
+    ("V-I", "Range", "Are values range-checked under the\nintended field encoding?", C_MAL),
+    ("V-II", "Ties", "Are ArgMax/TopK tie semantics\nspecified and enforced?", C_AMBER),
+    ("V-III", "Layers", "Does each layer implement its\nspecified relation?", C_PURPLE),
+    ("V-IV", "Quantization", "Are scale, rounding, clipping, and\noverflow rules fixed?", "#79c0ff"),
+    ("V-V", "Model", "Are weights tied to the authorized\nmodel version?", C_MAL),
 ]
 
 for i, (vid, name, question, color) in enumerate(checklist_data):
-    col = i % 2
-    row = i // 2
-    x0 = 0.28 if i == 4 else 0.04 + col * 0.48
-    y0 = 0.64 - row * 0.235
-    rect = mpatches.FancyBboxPatch((x0, y0), 0.44, 0.215,
-                                    boxstyle="round,pad=0.012",
-                                    facecolor=color, alpha=0.15,
-                                    edgecolor=color, linewidth=2,
+    x0 = 0.04
+    y0 = 0.72 - i * 0.145
+    row_height = 0.125
+    rect = mpatches.FancyBboxPatch((x0, y0), 0.92, row_height,
+                                    boxstyle="round,pad=0.008",
+                                    facecolor=color, alpha=0.12,
+                                    edgecolor=color, linewidth=1.5,
                                     transform=ax.transAxes)
     ax.add_patch(rect)
-    ax.text(x0 + 0.035, y0 + 0.162, vid, ha='left', va='center',
-            fontsize=10, fontweight='bold', color=color, transform=ax.transAxes)
-    ax.text(x0 + 0.15, y0 + 0.162, name, ha='left', va='center',
+    ax.plot([0.35, 0.35], [y0 + 0.018, y0 + row_height - 0.018],
+            color=EDGE, linewidth=0.8, transform=ax.transAxes)
+    ax.text(0.065, y0 + row_height / 2, vid, ha='left', va='center',
+            fontsize=8.2, fontweight='bold', color=color, transform=ax.transAxes)
+    ax.text(0.16, y0 + row_height / 2, name, ha='left', va='center',
             fontsize=7.8, fontweight='bold', color=TXT_H, transform=ax.transAxes)
-    ax.text(x0 + 0.22, y0 + 0.075, question, ha='center', va='center',
-            fontsize=8.2, color=TXT, transform=ax.transAxes, linespacing=1.25)
+    ax.text(0.38, y0 + row_height / 2, question, ha='left', va='center',
+            fontsize=8.0, color=TXT, transform=ax.transAxes, linespacing=1.12)
 
-ax.text(0.5, 0.035,
+ax.text(0.5, 0.045,
         "Review checklist only; not a compiler-specific audit or exploit study.",
-        ha='center', va='center', fontsize=7.2, color=TXT, transform=ax.transAxes)
+        ha='center', va='center', fontsize=6.8, color=TXT, transform=ax.transAxes)
 
 fig2.savefig(out_dir / "fig_zkml_taxonomy.jpg", dpi=220, facecolor=BG)
 plt.close()
