@@ -198,7 +198,7 @@ If a later implementation utilizes a circuit $\mathcal{C}$ for $f:\mathbb{R}^n\t
 \]
 Pailoor et al.\ found that some genuine circuits admit unintended witnesses~\cite{pailoor2023pldi}. A PoUI verifier must bind its score to the intended model, input, and inference semantics, having a proof alone is insufficient. The following five items are design review questions, not universal necessary or sufficient conditions. No EZKL circuit was compiled or exploit trace generated for this checklist. 
 
-\begin{figure}[t]
+\begin{figure}[!b]
   \centering
   \includegraphics[width=\columnwidth]{figures/fig_zkml_taxonomy.jpg}
   \caption{Five design review questions for a future PoUI inference circuit, not a circuit audit or universal soundness requirements.}
@@ -225,7 +225,7 @@ To ensure the suggested proof interface is executable, we created a deterministi
 
 Table~\ref{tab:pqc_sizes} reports byte sizes from FIPS 204 Table~2~\cite{nistfips204}, alongside Ed25519~\cite{rfc8032} and ECDSA-P256~\cite{nistfips1865}. This is a sizing calculation, not a timing benchmark.
 
-\begin{table}[t]
+\begin{table}[!b]
 \caption{Key and signature sizes. ML-DSA rows: FIPS 204 Table~2~\cite{nistfips204}, Ed25519: RFC 8032~\cite{rfc8032}, ECDSA-P256: 256 bit curve~\cite{nistfips1865}. Amplification is signature bytes divided by 64 (Ed25519).}
 \label{tab:pqc_sizes}
 \centering
@@ -251,12 +251,12 @@ ML-KEM-768 can establish a shared secret for confidential probe delivery, an aut
 
 Figure~\ref{fig:architecture} is a requirements diagram, not a running stack. It specifies where future implementations must share data and enforce deadlines.
 
-\begin{figure}[t]
+\begin{figure*}[!t]
   \centering
-  \includegraphics[width=\columnwidth]{figures/fig_architecture.png}
+  \includegraphics[width=\textwidth]{figures/fig_architecture.png}
   \caption{Proposed challenge/proof/score interfaces and unresolved design scenarios, not an implemented stack.}
   \label{fig:architecture}
-\end{figure}
+\end{figure*}
 
 IC-01 (L1$\to$L2): Request a proof of $y=f_\theta(x)$ under commitment $H(\theta)$, with an example budget of $5$ seconds and around $200$ KB.
 Failures include timeout, underconstrained accept, and out of memory.
