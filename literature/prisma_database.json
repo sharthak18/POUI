@@ -1,13 +1,10 @@
 {
+  "scope": "Legacy filename retained for compatibility. This file is a candidate bibliography, not a PRISMA database or screened systematic review.",
   "stats": {
-    "total_identified": 270,
-    "screened": 231,
-    "assessed_eligibility": 90,
-    "included": 60,
-    "excluded": 0,
-    "pending": 0,
-    "target": 60,
-    "completion_pct": 100.0,
+    "scope": "Candidate bibliography inventory only; not PRISMA identification, screening, or inclusion counts.",
+    "candidate_record_count": 60,
+    "source_verified_count": 0,
+    "source_unverified_count": 60,
     "by_domain": {
       "AI Consensus / PoUI": 16,
       "ZKML Security": 18,
@@ -21,7 +18,7 @@
       "2023-2024": 24,
       "2025-2026": 25
     },
-    "by_gap": {
+    "by_project_tag": {
       "G1": 18,
       "G2": 21,
       "G3": 19,
@@ -40,7 +37,8 @@
       "abstract_summary": "Proposes PoUI as a replacement for PoW, where validators prove useful AI computation instead of hash puzzles.",
       "gap_addressed": "G1",
       "key_contribution": "PoUI consensus mechanism definition and motivation",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "chong2025poui"
     },
@@ -55,7 +53,8 @@
       "abstract_summary": "Early work coupling AI task completion as proof-of-work; introduces concept of AI-native consensus.",
       "gap_addressed": "G1",
       "key_contribution": "Foundational AI-PoW concept",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "balaha2020pow"
     },
@@ -70,7 +69,8 @@
       "abstract_summary": "Survey of AI integration in blockchain consensus, covering reputation systems and AI-based validator selection.",
       "gap_addressed": "G1",
       "key_contribution": "AI consensus survey and gap identification",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "sengottaiyan2024ai"
     },
@@ -85,7 +85,8 @@
       "abstract_summary": "Broad survey of AI-Web3 intersection, including AI in DeFi, NFTs, and blockchain governance.",
       "gap_addressed": "G1",
       "key_contribution": "AI-Web3 landscape survey",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "ai_web3_2023"
     },
@@ -100,7 +101,8 @@
       "abstract_summary": "Industry AI-native blockchain where validators earn by contributing AI compute tasks.",
       "gap_addressed": "G1",
       "key_contribution": "Production AI-native blockchain reference",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "bittensor2024"
     },
@@ -115,7 +117,8 @@
       "abstract_summary": "Layer-1 blockchain natively designed for AI inference as first-class consensus primitive.",
       "gap_addressed": "G1",
       "key_contribution": "Emerging AI-native L1 reference design",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "lightchain2025"
     },
@@ -130,7 +133,8 @@
       "abstract_summary": "Introduces Coin.AI, a framework for distributed deep learning consensus where blocks are mined when training hits accuracy thresholds.",
       "gap_addressed": "G1",
       "key_contribution": "Coin.AI framework",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "lihu2021coin"
     },
@@ -145,7 +149,8 @@
       "abstract_summary": "Presents a verifiable training protocol with random validation epochs to prevent lazy miner shortcuts.",
       "gap_addressed": "G1",
       "key_contribution": "Verifiable training consensus",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "zhang2022decentralized"
     },
@@ -160,7 +165,8 @@
       "abstract_summary": "Integrates federated learning into consensus, utilizing model aggregation steps as validator selection metrics.",
       "gap_addressed": "G1",
       "key_contribution": "Federated learning consensus",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "lu2023pofl"
     },
@@ -175,7 +181,8 @@
       "abstract_summary": "Foundational framework for decentralized AI model training with incentive mechanisms and cryptographic verification.",
       "gap_addressed": "G1",
       "key_contribution": "DeepChain secure training design",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "weng2021deepchain"
     },
@@ -190,7 +197,8 @@
       "abstract_summary": "Formulates cryptographic proofs for verifiable neural network training over untrusted peer-to-peer networks.",
       "gap_addressed": "G1",
       "key_contribution": "Cryptographic proof of training formulation",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "alrubaie2024pot"
     },
@@ -205,7 +213,8 @@
       "abstract_summary": "Proposes trust-based node score updates utilizing inference latency and accuracy profiles for resource-constrained edge systems.",
       "gap_addressed": "G1",
       "key_contribution": "IoT-edge reputation-based PoUI",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "wang2025reputation"
     },
@@ -220,7 +229,8 @@
       "abstract_summary": "Examines game-theoretic properties of PoUW, showing security bounds when the computational task has commercial utility.",
       "gap_addressed": "G1",
       "key_contribution": "PoUW game-theoretic analysis",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "ma2023incentivizing"
     },
@@ -235,7 +245,8 @@
       "abstract_summary": "Leverages large-scale ML inference tasks to compute consensus validator rankings, optimizing network throughput.",
       "gap_addressed": "G1",
       "key_contribution": "Useful work from ML inference",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "gong2024inference"
     },
@@ -250,7 +261,8 @@
       "abstract_summary": "Develops a consensus protocol with model performance metrics embedded in validator election algorithms.",
       "gap_addressed": "G1",
       "key_contribution": "Consensus governance of AI models",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "ruan2025governance"
     },
@@ -265,7 +277,8 @@
       "abstract_summary": "Reviews historical reputation-based consensus protocols and identifies vulnerabilities to strategic collusive attackers.",
       "gap_addressed": "G1",
       "key_contribution": "Reputation blockchain survey",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "liu2026trust"
     },
@@ -280,7 +293,8 @@
       "abstract_summary": "Comprehensive ZKML survey covering 27 studies. Identifies proving cost, circuit expressiveness, and deployment complexity as key bottlenecks.",
       "gap_addressed": "G2",
       "key_contribution": "ZKML state-of-the-art and bottleneck identification",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "peng2025zkml"
     },
@@ -295,7 +309,8 @@
       "abstract_summary": "Formalizes underconstrained circuit problem; builds automated detection tool. Foundational to our ZKML taxonomy.",
       "gap_addressed": "G2",
       "key_contribution": "Underconstrained circuit formalization (core methodology reference)",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "pailoor2023ccs"
     },
@@ -310,7 +325,8 @@
       "abstract_summary": "Compares on-chain ZKML systems including EZKL, Modulus Labs, and zkML frameworks.",
       "gap_addressed": "G2",
       "key_contribution": "On-chain ZKML systems comparison",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "onchain_zkml2024"
     },
@@ -325,7 +341,8 @@
       "abstract_summary": "Combines AI and blockchain for vulnerability discovery; intersects ZKML and blockchain security.",
       "gap_addressed": "G2",
       "key_contribution": "AI+blockchain security framework reference",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "zer0n2025"
     },
@@ -340,7 +357,8 @@
       "abstract_summary": "Industry technical report on ZKML production deployment challenges and security considerations.",
       "gap_addressed": "G2",
       "key_contribution": "ZKML production security challenges",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "kudelski2025zkml"
     },
@@ -355,7 +373,8 @@
       "abstract_summary": "Demonstrates on-chain verification of ML models with up to 18 million parameters using ZKML.",
       "gap_addressed": "G2",
       "key_contribution": "ZKML scalability benchmark reference",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "modulus2024"
     },
@@ -370,7 +389,8 @@
       "abstract_summary": "EZKL framework for compiling neural networks to ZK circuits. Core tooling for our RQ2 analysis.",
       "gap_addressed": "G2",
       "key_contribution": "ZKML circuit compilation toolchain",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "ezkl2024"
     },
@@ -385,7 +405,8 @@
       "abstract_summary": "Uses ZKML for iris-based identity verification on-chain. Production ZKML deployment case study.",
       "gap_addressed": "G2",
       "key_contribution": "Production ZKML deployment (Worldcoin iris verification)",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "worldcoin2023"
     },
@@ -400,7 +421,8 @@
       "abstract_summary": "Optimizes ZKML systems, proposing layout-aware constraints for deep convolutional networks, reducing proving overhead.",
       "gap_addressed": "G2",
       "key_contribution": "CNN optimization for ZKML",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "kang2024zkml"
     },
@@ -415,7 +437,8 @@
       "abstract_summary": "Evaluates ZKMLOps pipelines, identifying threat models around out-of-bounds inputs and underconstrained floating-point conversions.",
       "gap_addressed": "G2",
       "key_contribution": "ZKMLOps pipelines security",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "lee2025trustworthy"
     },
@@ -430,7 +453,8 @@
       "abstract_summary": "Exposes logic bugs in Halo2 lookup tables for activation functions like ReLU and Sigmoid, causing verification bypasses.",
       "gap_addressed": "G2",
       "key_contribution": "Activation function lookup bugs",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "gupta2025vulnerability"
     },
@@ -445,7 +469,8 @@
       "abstract_summary": "Formulates deductive verification rules for ZKML circuits, proving correctness bounds of quantized model weights.",
       "gap_addressed": "G2",
       "key_contribution": "Formal proof of quantized circuits",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "pailoor2024popl"
     },
@@ -460,7 +485,8 @@
       "abstract_summary": "Demonstrates how quantization scaling factor range mismatches allow invalid proofs to be verified as authentic.",
       "gap_addressed": "G2",
       "key_contribution": "Quantization scaling factor vulnerability",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "zheng2025soundness"
     },
@@ -475,7 +501,8 @@
       "abstract_summary": "Builds static analysis tools for Circom and Halo2 to detect missing constraint violations in variable-length matrix operations.",
       "gap_addressed": "G2",
       "key_contribution": "Static analysis for ZK bugs",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "siddiqui2024detecting"
     },
@@ -490,7 +517,8 @@
       "abstract_summary": "First zero-knowledge proof framework optimized for CNN operations, demonstrating secure matrix transformations.",
       "gap_addressed": "G2",
       "key_contribution": "Verifiable CNN verification engine",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "zhao2022vcnn"
     },
@@ -505,7 +533,8 @@
       "abstract_summary": "Analyzes the computational limits of verifying deep layer representations in zero knowledge, suggesting partition proofs.",
       "gap_addressed": "G2",
       "key_contribution": "Deep NN layer verification limits",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "giacomelli2023verifying"
     },
@@ -520,7 +549,8 @@
       "abstract_summary": "Audits commercial ZKML implementations, highlighting common vulnerabilities including unconstrained inputs and state mismatch.",
       "gap_addressed": "G2",
       "key_contribution": "Auditing production ZKML",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "smith2026audits"
     },
@@ -535,7 +565,8 @@
       "abstract_summary": "A benchmark implementation of MNIST classification inside a Groth16 circuit, analyzing proving times and soundness gates.",
       "gap_addressed": "G2",
       "key_contribution": "MNIST Groth16 benchmarks",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "modulus2023mnist"
     },
@@ -550,7 +581,8 @@
       "abstract_summary": "Comprehensive SoK covering quantum attacks across UTXO, account-balance models, and consensus. Shows PQC swap introduces intolerable overhead naively.",
       "gap_addressed": "G3",
       "key_contribution": "PQC blockchain threat landscape and overhead baseline",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "schemitt2025sok"
     },
@@ -565,7 +597,8 @@
       "abstract_summary": "Official FIPS 203 and 204 standards finalizing ML-KEM (Kyber) and ML-DSA (Dilithium). Core reference for our benchmarks.",
       "gap_addressed": "G3",
       "key_contribution": "PQC standards definition (ML-DSA, ML-KEM)",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "nist2024pqc"
     },
@@ -580,7 +613,8 @@
       "abstract_summary": "Direct benchmark study of PQC DSA overhead on blockchain. Closest prior work to our RQ3.",
       "gap_addressed": "G3",
       "key_contribution": "PQC blockchain overhead assessment (closest prior RQ3 work)",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "pqc_blockchain2025"
     },
@@ -595,7 +629,8 @@
       "abstract_summary": "Survey of quantum threats to blockchain and PQC migration strategies.",
       "gap_addressed": "G3",
       "key_contribution": "Quantum threat survey for blockchain",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "quantum_era2024"
     },
@@ -610,7 +645,8 @@
       "abstract_summary": "Systematic survey of PQC integration in DLT systems.",
       "gap_addressed": "G3",
       "key_contribution": "PQC DLT integration survey",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "pq_dlt2023"
     },
@@ -625,7 +661,8 @@
       "abstract_summary": "Risk assessment framework for blockchain quantum migration; proposes phased PQC deployment.",
       "gap_addressed": "G3",
       "key_contribution": "Quantum migration risk assessment",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "chhetri2025quantum"
     },
@@ -640,7 +677,8 @@
       "abstract_summary": "Hardware-accelerated PQC implementation on RISC-V; relevant to our M4 mitigation.",
       "gap_addressed": "G3",
       "key_contribution": "PQC hardware acceleration (M4 mitigation reference)",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "quasar2025"
     },
@@ -655,7 +693,8 @@
       "abstract_summary": "Real-world PQC performance benchmarks in high-throughput network environments.",
       "gap_addressed": "G3",
       "key_contribution": "PQC performance in high-TPS networks (6G analogy)",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "pqc_6g2025"
     },
@@ -670,7 +709,8 @@
       "abstract_summary": "Evaluates the computational and gas cost of verifying hybrid ECDSA + ML-DSA signatures in EVM smart contracts.",
       "gap_addressed": "G3",
       "key_contribution": "Hybrid EVM PQC benchmarks",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "schubert2026hybrid"
     },
@@ -685,7 +725,8 @@
       "abstract_summary": "Compares Falcon and ML-DSA signature verification latency, indicating Falcon's size advantage but higher verification complexity.",
       "gap_addressed": "G3",
       "key_contribution": "Falcon and ML-DSA comparative benchmarks",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "rauchs2025falcon"
     },
@@ -700,7 +741,8 @@
       "abstract_summary": "Reviews state-of-the-art PQC migration timelines for permissionless ledgers, identifying serialization overheads.",
       "gap_addressed": "G3",
       "key_contribution": "Timeline and serialization limits for PQC on-chain",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "konduri2025dlt"
     },
@@ -715,7 +757,8 @@
       "abstract_summary": "Aggregates key/signature size data of NIST PQC finalists, plotting impact on transaction-level throughput.",
       "gap_addressed": "G3",
       "key_contribution": "Survey of signature schemes size impact",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "fernandez2024survey"
     },
@@ -730,7 +773,8 @@
       "abstract_summary": "Details optimization tricks for verifying ML-DSA signatures in resource-constrained execution environments.",
       "gap_addressed": "G3",
       "key_contribution": "Optimization techniques for EVM lattice verify",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "bernstein2025lattice"
     },
@@ -745,7 +789,8 @@
       "abstract_summary": "Advocates for XMSS and LMS signature integration in validator gossip networks as an alternative to lattice schemes.",
       "gap_addressed": "G3",
       "key_contribution": "Stateful signature consensus integration",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "buchmann2024stateful"
     },
@@ -760,7 +805,8 @@
       "abstract_summary": "Develops a novel aggregation scheme for ML-DSA-44 signatures to support high-throughput validator consensus.",
       "gap_addressed": "G3",
       "key_contribution": "Aggregated lattice signatures for validators",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "pointcheval2025aggregate"
     },
@@ -775,7 +821,8 @@
       "abstract_summary": "Presents FPGA implementations of ML-DSA to speed up signature generation times on lightweight hardware nodes.",
       "gap_addressed": "G3",
       "key_contribution": "FPGA hardware acceleration of ML-DSA",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "kim2025hardware"
     },
@@ -790,7 +837,8 @@
       "abstract_summary": "Quantifies ledger state growth when converting from classical to lattice-based post-quantum cryptography.",
       "gap_addressed": "G3",
       "key_contribution": "Storage scaling models under PQC swap",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "alsaji2024storage"
     },
@@ -805,7 +853,8 @@
       "abstract_summary": "Explores Falcon signature verification inside PLONK circuits, measuring proving time and constraints.",
       "gap_addressed": "G3",
       "key_contribution": "PQC signature verification inside SNARKs",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "salkind2026falcon"
     },
@@ -820,7 +869,8 @@
       "abstract_summary": "Proposes governance layer using PoP and zk-STARKs for AI safety. Conceptual convergence of ZKP, AI governance, PQC.",
       "gap_addressed": "G4",
       "key_contribution": "AI alignment + ZKP + blockchain governance (closest co-design reference)",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "aialign2024"
     },
@@ -835,7 +885,8 @@
       "abstract_summary": "First co-design study linking lattice-based signatures (PQC) and ZKML inference proofs in a decentralized AI-consensus node network.",
       "gap_addressed": "G4",
       "key_contribution": "Co-designing ZKML and lattice signatures",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "bao2026codesign"
     },
@@ -850,7 +901,8 @@
       "abstract_summary": "Ethereum PoS design reference; validator set management, slashing, and epoch mechanics.",
       "gap_addressed": "G1",
       "key_contribution": "PoS consensus baseline reference",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "buterin2020eth"
     },
@@ -865,7 +917,8 @@
       "abstract_summary": "Original Bitcoin whitepaper. Foundational consensus reference.",
       "gap_addressed": "G1",
       "key_contribution": "Foundational blockchain consensus",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "nakamoto2008"
     },
@@ -880,7 +933,8 @@
       "abstract_summary": "Groth16 zk-SNARK proof system used by many ZKML frameworks.",
       "gap_addressed": "G2",
       "key_contribution": "ZK-SNARK foundational reference",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "groth2016"
     },
@@ -895,7 +949,8 @@
       "abstract_summary": "PLONK proof system; universal and updatable SRS, widely used in EZKL.",
       "gap_addressed": "G2",
       "key_contribution": "PLONK ZK proof system reference",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "plonk2019"
     },
@@ -910,7 +965,8 @@
       "abstract_summary": "LWE hardness assumption underpinning ML-DSA and ML-KEM.",
       "gap_addressed": "G3",
       "key_contribution": "LWE mathematical foundation for PQC",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "regev2010lwe"
     },
@@ -925,16 +981,16 @@
       "abstract_summary": "Halo2 IPA-based proof system; enables recursive proof composition for ZKML.",
       "gap_addressed": "G2",
       "key_contribution": "Recursive SNARK for ZKML (V-III mitigation)",
-      "status": "INCLUDED",
+      "status": "NEEDS_VERIFICATION",
+      "source_verified": false,
       "exclusion_reason": null,
       "citation_key": "halo2_2020"
     }
   ],
-  "pending_searches": [
-    "Search IEEE Xplore: 'AI consensus blockchain validator' \u2192 complete",
-    "Search arXiv cs.CR: 'underconstrained zkp circuit' \u2192 complete",
-    "Search ACM DL: 'post-quantum blockchain consensus' \u2192 complete",
-    "Search Scopus: 'Trust Score blockchain validator' \u2192 complete",
-    "Search SpringerLink: 'federated learning blockchain zero-knowledge' \u2192 complete"
+  "review_notes": [
+    "No database query strings, dates, or exported result sets are included.",
+    "No deduplication log or title/abstract/full-text screening decisions are included.",
+    "Verify each title, author list, year, venue, DOI/URL, and primary-source text before citation.",
+    "Do not use the legacy PRISMA flowchart as evidence of a systematic review."
   ]
 }

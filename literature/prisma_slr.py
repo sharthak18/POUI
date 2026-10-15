@@ -1,19 +1,11 @@
 """
-Phase 6: PRISMA-Compliant Systematic Literature Review (SLR)
-=============================================================
-PRISMA 2020-compliant systematic review across:
-  - IEEE Xplore, ACM Digital Library, arXiv, SpringerLink, Scopus
-  
-Search domains:
-  (A) AI Consensus / Proof of Useful Intelligence
-  (B) Zero-Knowledge Machine Learning (ZKML) Security
-  (C) Post-Quantum Cryptography on Blockchain
-  (D) Co-Design / AI-Native Blockchain Architecture
+Curated literature candidate register for the PoUI research project.
 
-Target: 60+ papers (2020–2026), with pre-2020 foundational works
-
-Authors: Md. Mehedi Hasan (Team Lead), Antigravity AI (Research Assistant)
-Project: Towards an AI-Native Blockchain Framework
+This legacy-named script does NOT perform a PRISMA search or screening process.
+The records are a manually maintained candidate bibliography. Search queries,
+dates, deduplication records, full-text screening decisions, and exclusion logs
+are not present in this repository, and the source metadata has not been audited.
+Do not report its output as a completed systematic literature review.
 """
 
 import json
@@ -31,10 +23,9 @@ class Domain(str, Enum):
     E = "Foundational (Consensus Theory / ZKP Mathematics)"
 
 
-class InclusionStatus(str, Enum):
-    INCLUDED  = "INCLUDED"
-    EXCLUDED  = "EXCLUDED"
-    PENDING   = "PENDING"
+class CatalogStatus(str, Enum):
+    NEEDS_VERIFICATION = "NEEDS_VERIFICATION"
+    VERIFIED = "VERIFIED"
 
 
 @dataclass
@@ -49,13 +40,15 @@ class Paper:
     abstract_summary: str
     gap_addressed: str      # Which gap from proposal (G1–G4) it informs
     key_contribution: str
-    status: InclusionStatus = InclusionStatus.INCLUDED
+    # Bibliographic curation status, not a PRISMA screening decision.
+    status: CatalogStatus = CatalogStatus.NEEDS_VERIFICATION
+    source_verified: bool = False
     exclusion_reason: Optional[str] = None
     citation_key: str = ""
 
 
 # =============================================================================
-# PRISMA PAPER DATABASE (Target: 60 | Current: 60)
+# MANUALLY MAINTAINED CANDIDATE BIBLIOGRAPHY (60 unverified records)
 # =============================================================================
 
 PAPERS: List[Paper] = [
@@ -436,105 +429,87 @@ PAPERS: List[Paper] = [
           "G2", "Recursive SNARK for ZKML (V-III mitigation)", citation_key="halo2_2020"),
 ]
 
-# Pending papers to add (PRISMA search ongoing)
-PENDING_NOTES = [
-    "Search IEEE Xplore: 'AI consensus blockchain validator' → complete",
-    "Search arXiv cs.CR: 'underconstrained zkp circuit' → complete",
-    "Search ACM DL: 'post-quantum blockchain consensus' → complete",
-    "Search Scopus: 'Trust Score blockchain validator' → complete",
-    "Search SpringerLink: 'federated learning blockchain zero-knowledge' → complete"
+# Verification notes: these are work items, not completed database searches.
+REVIEW_NOTES = [
+    "No database query strings, dates, or exported result sets are included.",
+    "No deduplication log or title/abstract/full-text screening decisions are included.",
+    "Verify each title, author list, year, venue, DOI/URL, and primary-source text before citation.",
+    "Do not use the legacy PRISMA flowchart as evidence of a systematic review.",
 ]
 
 
-# =============================================================================
-# PRISMA FLOW STATISTICS
-# =============================================================================
-
-def compute_prisma_stats(papers: List[Paper]) -> dict:
-    included  = [p for p in papers if p.status == InclusionStatus.INCLUDED]
-    excluded  = [p for p in papers if p.status == InclusionStatus.EXCLUDED]
-    pending   = [p for p in papers if p.status == InclusionStatus.PENDING]
-
-    by_domain = {}
-    for d in Domain:
-        by_domain[d.value] = len([p for p in included if p.domain == d])
-
-    by_year_range = {
-        "pre-2020": len([p for p in included if p.year < 2020]),
-        "2020-2022": len([p for p in included if 2020 <= p.year <= 2022]),
-        "2023-2024": len([p for p in included if 2023 <= p.year <= 2024]),
-        "2025-2026": len([p for p in included if p.year >= 2025]),
+def compute_catalog_stats(papers: List[Paper]) -> dict:
+    """Summarize the candidate bibliography without implying PRISMA screening."""
+    by_domain = {
+        domain.value: sum(p.domain == domain for p in papers)
+        for domain in Domain
     }
-
-    by_gap = {}
-    for g in ["G1", "G2", "G3", "G4"]:
-        by_gap[g] = len([p for p in included if p.gap_addressed == g])
-
+    by_year_range = {
+        "pre-2020": sum(p.year < 2020 for p in papers),
+        "2020-2022": sum(2020 <= p.year <= 2022 for p in papers),
+        "2023-2024": sum(2023 <= p.year <= 2024 for p in papers),
+        "2025-2026": sum(p.year >= 2025 for p in papers),
+    }
+    by_gap = {
+        gap: sum(p.gap_addressed == gap for p in papers)
+        for gap in ("G1", "G2", "G3", "G4")
+    }
+    verified = sum(p.source_verified for p in papers)
     return {
-        "total_identified": 248 + 22,  # Matches the PRISMA flowchart numbers
-        "screened":   231,
-        "assessed_eligibility": 90,
-        "included": len(included),
-        "excluded": len(excluded),
-        "pending":  len(pending),
-        "target":   60,
-        "completion_pct": round(len(included) / 60 * 100, 1),
+        "scope": "Candidate bibliography inventory only; not PRISMA identification, screening, or inclusion counts.",
+        "candidate_record_count": len(papers),
+        "source_verified_count": verified,
+        "source_unverified_count": len(papers) - verified,
         "by_domain": by_domain,
         "by_year_range": by_year_range,
-        "by_gap": by_gap,
+        "by_project_tag": by_gap,
     }
 
 
-def print_gap_table(papers: List[Paper]):
-    included = [p for p in papers if p.status == InclusionStatus.INCLUDED]
-    gaps = {
-        "G1": ("Consensus (PoUI)", "No formally proven, manipulation-resistant Trust Score"),
-        "G2": ("ZKML",            "No ZKML underconstrained circuit taxonomy in validator context"),
-        "G3": ("PQC",             "PQC overhead unquantified in AI-intensive consensus environments"),
-        "G4": ("Co-Design",       "No published co-design study of PoUI+ZKML+PQC unified architecture"),
-    }
-    print("\n[Gap Analysis Table]")
-    print(f"  {'GapID':<6} {'Domain':<18} {'Papers':>8} {'Our Contribution'}")
-    print("  " + "-"*85)
-    for gid, (domain, desc) in gaps.items():
-        count = len([p for p in included if p.gap_addressed == gid])
-        print(f"  {gid:<6} {domain:<18} {count:>8}   {'→ RQ'+gid[1:]}: Addressed by this paper")
-    print()
+def print_candidate_topic_table(papers: List[Paper]) -> None:
+    """Print catalogue counts; these are not evidence that a research gap is real."""
+    print("\n[Candidate Bibliography Tags — not a systematic-review gap analysis]")
+    print(f"  {'Tag':<6} {'Topic':<32} {'Records':>8}")
+    print("  " + "-" * 50)
+    for domain in Domain:
+        count = sum(p.domain == domain for p in papers)
+        print(f"  {domain.name:<6} {domain.value[:32]:<32} {count:>8}")
 
 
-def main():
-    stats = compute_prisma_stats(PAPERS)
+def main() -> dict:
+    stats = compute_catalog_stats(PAPERS)
     out_dir = Path(__file__).parent
     out_dir.mkdir(exist_ok=True)
 
-    print("\n" + "="*60)
-    print("  PRISMA SYSTEMATIC LITERATURE REVIEW — Phase 6")
-    print("="*60)
-    print(f"\n  Papers included so far : {stats['included']} / {stats['target']} target")
-    print(f"  Completion             : {stats['completion_pct']}%")
-    print(f"\n  By domain:")
-    for domain, count in stats["by_domain"].items():
-        bar = "█" * count
-        print(f"    {domain[:35]:<35} {count:>3}  {bar}")
-    print(f"\n  By year range:")
-    for yr, count in stats["by_year_range"].items():
-        print(f"    {yr:<12}: {count}")
+    print("\n" + "=" * 65)
+    print("  CURATED LITERATURE CANDIDATE REGISTER")
+    print("  NOT A PRISMA SYSTEMATIC LITERATURE REVIEW")
+    print("=" * 65)
+    print(f"\n  Candidate records     : {stats['candidate_record_count']}")
+    print(f"  Source-verified       : {stats['source_verified_count']}")
+    print(f"  Needs verification    : {stats['source_unverified_count']}")
+    print("  Search/screening logs : not included in this repository")
+    print("\n  By year range:")
+    for year_range, count in stats["by_year_range"].items():
+        print(f"    {year_range:<12}: {count}")
 
-    print_gap_table(PAPERS)
+    print_candidate_topic_table(PAPERS)
 
-    print("  Pending searches:")
-    for note in PENDING_NOTES:
-        print(f"    • {note}")
+    for note in REVIEW_NOTES:
+        print("  -", note)
 
-    # Save
-    out = out_dir / "prisma_database.json"
-    with open(out, "w") as f:
-        json.dump({
-            "stats": stats,
-            "papers": [asdict(p) for p in PAPERS],
-            "pending_searches": PENDING_NOTES,
-        }, f, indent=2, default=str)
-    print(f"\n  Saved: {out}")
+    output = out_dir / "prisma_database.json"  # retained legacy path
+    payload = {
+        "scope": (
+            "Legacy filename retained for compatibility. This file is a candidate "
+            "bibliography, not a PRISMA database or screened systematic review."
+        ),
+        "stats": stats,
+        "papers": [asdict(paper) for paper in PAPERS],
+        "review_notes": REVIEW_NOTES,
+    }
+    output.write_text(json.dumps(payload, indent=2, default=str) + "\n", encoding="utf-8")
+    print(f"\n  Candidate register saved: {output}")
     return stats
 
 

@@ -1,176 +1,77 @@
-"""
-PRISMA 2020 Flowchart Generator
-=================================
-Generates the PRISMA-compliant systematic review flowchart
-for inclusion in the paper (Fig. PRISMA).
+"""Generate a bibliography-register status figure (legacy filename).
 
-PRISMA 2020 stages:
-  Identification → Screening → Eligibility → Included
-  
-Authors: Md. Mehedi Hasan (Team Lead), Antigravity AI (Research Assistant)
-Project: Towards an AI-Native Blockchain Framework
+This script deliberately does not draw a PRISMA flow diagram: the repository
+has no auditable database-search exports or screening decisions. Run
+``python3 literature/prisma_slr.py`` first to regenerate the candidate register.
+The output is an inventory/status graphic and must not be cited as PRISMA evidence.
 """
 
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
-from matplotlib.patches import FancyArrowPatch
+from __future__ import annotations
+
+import json
 from pathlib import Path
 
-BG    = "#0d1117"
-PANEL = "#161b22"
-EDGE  = "#30363d"
-TXT   = "#c9d1d9"
-TXT_H = "#e6edf3"
+import matplotlib.pyplot as plt
 
-C_ID     = "#58a6ff"   # Identification — blue
-C_SCREEN = "#d29922"   # Screening — amber
-C_ELIG   = "#bc8cff"   # Eligibility — purple
-C_INCL   = "#3fb950"   # Included — green
-C_EXCL   = "#f85149"   # Excluded — red
-
-fig, ax = plt.subplots(figsize=(14, 10), facecolor=BG)
-ax.set_facecolor(BG)
-ax.set_xlim(0, 10)
-ax.set_ylim(0, 10)
-ax.axis("off")
-
-fig.suptitle(
-    "PRISMA 2020 Flow Diagram — Systematic Literature Review\n"
-    "Towards an AI-Native Blockchain Framework",
-    fontsize=13, fontweight="bold", color=TXT_H, y=0.98
-)
+ROOT = Path(__file__).resolve().parent.parent
+REGISTER = ROOT / "literature" / "prisma_database.json"
+OUTPUT = Path(__file__).resolve().parent / "figures" / "fig_literature_register_status.png"
 
 
-def box(ax, x, y, w, h, label, sublabel, color, fontsize=9):
-    """Draw a rounded box with label."""
-    rect = mpatches.FancyBboxPatch(
-        (x - w/2, y - h/2), w, h,
-        boxstyle="round,pad=0.1",
-        facecolor=color, alpha=0.15,
-        edgecolor=color, linewidth=2,
-        transform=ax.transData
+def main() -> None:
+    if not REGISTER.exists():
+        raise SystemExit(
+            f"Missing {REGISTER}; run `python3 literature/prisma_slr.py` first."
+        )
+
+    data = json.loads(REGISTER.read_text(encoding="utf-8"))
+    stats = data["stats"]
+    by_domain = stats["by_domain"]
+    labels = list(by_domain)
+    values = [by_domain[label] for label in labels]
+
+    bg = "#0d1117"
+    panel = "#161b22"
+    text = "#c9d1d9"
+    colors = ["#3fb950", "#58a6ff", "#d29922", "#bc8cff", "#79c0ff"][:len(labels)]
+
+    fig, ax = plt.subplots(figsize=(12, 6), facecolor=bg)
+    ax.set_facecolor(panel)
+    bars = ax.barh(labels, values, color=colors, edgecolor="#30363d")
+    ax.invert_yaxis()
+    ax.set_xlabel("Candidate records (not screening/inclusion counts)", color=text)
+    ax.tick_params(colors=text)
+    ax.xaxis.label.set_color(text)
+    for spine in ax.spines.values():
+        spine.set_color("#30363d")
+    ax.grid(axis="x", linestyle="--", alpha=0.25, color=text)
+    ax.set_axisbelow(True)
+    for bar, value in zip(bars, values):
+        ax.text(value + 0.2, bar.get_y() + bar.get_height() / 2, str(value),
+                va="center", color=text)
+
+    fig.suptitle(
+        "Curated Literature Candidate Register — NOT A PRISMA Flow",
+        color="#e6edf3", fontsize=14, fontweight="bold", y=0.96,
     )
-    ax.add_patch(rect)
-    ax.text(x, y + h*0.12, label, ha="center", va="center",
-            fontsize=fontsize, fontweight="bold", color=color)
-    if sublabel:
-        ax.text(x, y - h*0.18, sublabel, ha="center", va="center",
-                fontsize=fontsize - 1, color=TXT)
-
-
-def arrow(ax, x1, y1, x2, y2, color="#8b949e"):
-    ax.annotate("", xy=(x2, y2), xytext=(x1, y1),
-                arrowprops=dict(arrowstyle="-|>", color=color, lw=1.8,
-                                mutation_scale=15))
-
-
-def excl_box(ax, x, y, w, h, label, color=C_EXCL):
-    rect = mpatches.FancyBboxPatch(
-        (x - w/2, y - h/2), w, h,
-        boxstyle="round,pad=0.08",
-        facecolor=color, alpha=0.12,
-        edgecolor=color, linewidth=1.5,
-        transform=ax.transData
+    fig.text(
+        0.5, 0.87,
+        f"{stats['candidate_record_count']} candidate records; "
+        f"{stats['source_verified_count']} source-verified; "
+        "search exports, deduplication, and screening logs are not present.",
+        ha="center", color=text, fontsize=9,
     )
-    ax.add_patch(rect)
-    ax.text(x, y, label, ha="center", va="center",
-            fontsize=8, color=color, style="italic")
+    fig.text(
+        0.5, 0.04,
+        "Inventory only. Verify every record and document a reproducible search before claiming a systematic review.",
+        ha="center", color="#f85149", fontsize=9, fontweight="bold",
+    )
+    fig.tight_layout(rect=[0.03, 0.10, 0.97, 0.82])
+    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(OUTPUT, dpi=150, bbox_inches="tight", facecolor=bg)
+    plt.close(fig)
+    print("Candidate-register status figure saved:", OUTPUT)
 
 
-# ── Stage labels ─────────────────────────────────────────────────────────────
-stage_x = 0.7
-for sy, slabel, scol in [
-    (8.8, "IDENTIFICATION", C_ID),
-    (6.5, "SCREENING",      C_SCREEN),
-    (4.2, "ELIGIBILITY",    C_ELIG),
-    (1.9, "INCLUDED",       C_INCL),
-]:
-    ax.text(stage_x, sy, slabel, ha="center", va="center",
-            fontsize=8, fontweight="bold", color=scol,
-            rotation=90,
-            bbox=dict(boxstyle="round,pad=0.3", fc=PANEL, ec=scol, alpha=0.8))
-
-# ── IDENTIFICATION STAGE ─────────────────────────────────────────────────────
-# Databases
-box(ax, 4.0, 9.0, 3.8, 0.7,
-    "Records identified through database searching",
-    "IEEE Xplore, arXiv, ACM DL, Scopus, SpringerLink  (n = 248)",
-    C_ID)
-
-box(ax, 7.5, 9.0, 2.6, 0.7,
-    "Additional records identified",
-    "Whitepapers, NIST docs, industry reports  (n = 22)",
-    C_ID)
-
-# Merge arrow
-arrow(ax, 4.0, 8.65, 4.0, 8.05)
-arrow(ax, 7.5, 8.65, 5.9, 8.05)
-
-box(ax, 5.0, 7.7, 4.2, 0.6,
-    "Total records after duplicates removed",
-    "n = 231",
-    C_ID)
-
-# ── SCREENING STAGE ──────────────────────────────────────────────────────────
-arrow(ax, 5.0, 7.40, 5.0, 6.85)
-
-box(ax, 5.0, 6.55, 4.2, 0.6,
-    "Records screened (title + abstract)",
-    "n = 231",
-    C_SCREEN)
-
-excl_box(ax, 8.4, 6.55, 2.2, 0.5,
-         "Records excluded\n(out-of-scope, n=141)")
-arrow(ax, 7.1, 6.55, 7.3, 6.55, C_EXCL)
-
-# ── ELIGIBILITY STAGE ─────────────────────────────────────────────────────────
-arrow(ax, 5.0, 6.25, 5.0, 5.35)
-
-box(ax, 5.0, 5.05, 4.2, 0.6,
-    "Full-text articles assessed for eligibility",
-    "n = 90",
-    C_ELIG)
-
-excl_box(ax, 8.4, 5.05, 2.2, 0.7,
-         "Full-text excluded  (n=61)\n• No blockchain context: 22\n• No formal analysis: 19\n• Duplicate results: 12\n• Inaccessible: 8")
-arrow(ax, 7.1, 5.05, 7.3, 5.05, C_EXCL)
-
-# ── INCLUDED STAGE ────────────────────────────────────────────────────────────
-arrow(ax, 5.0, 4.75, 5.0, 3.55)
-
-box(ax, 5.0, 3.25, 4.2, 0.6,
-    "Studies included in synthesis",
-    "n = 60",
-    C_INCL)
-
-# Breakdown
-for i, (domain, n, col) in enumerate([
-    ("Domain A — AI Consensus / PoUI",          16, C_INCL),
-    ("Domain B — ZKML Security",                18, C_INCL),
-    ("Domain C — PQC on Blockchain",            18, C_INCL),
-    ("Domain D — Co-Design / Architecture",     2, C_INCL),
-    ("Domain E — Foundational (ZKP, Math)",     6, C_INCL),
-]):
-    y_i = 2.55 - i * 0.37
-    ax.plot([3.1, 3.5], [y_i, y_i], color=col, linewidth=1.2, alpha=0.7)
-    ax.text(3.55, y_i, f"{domain}  →  n={n}", ha="left", va="center",
-            fontsize=7.5, color=col)
-
-# Year range annotation
-ax.text(5.0, 0.55,
-        "Year range: 2008–2026  |  Priority: 2020–2026 (85%)  |  "
-        "Foundational pre-2020 works: 15%",
-        ha="center", va="center", fontsize=8, color="#8b949e",
-        bbox=dict(boxstyle="round,pad=0.3", fc=PANEL, ec=EDGE, alpha=0.8))
-
-# Search query box
-ax.text(5.0, 0.20,
-        'Search queries: "AI consensus blockchain" | "proof of useful intelligence" | '
-        '"ZKML underconstrained circuits" | "post-quantum blockchain overhead" | "AI-native protocol"',
-        ha="center", va="center", fontsize=7, color="#8b949e", style="italic")
-
-out = Path(__file__).parent / "figures" / "fig_prisma_flowchart.png"
-out.parent.mkdir(exist_ok=True)
-fig.savefig(out, dpi=150, bbox_inches="tight", facecolor=BG)
-plt.close()
-print(f"PRISMA flowchart saved: {out}")
+if __name__ == "__main__":
+    main()

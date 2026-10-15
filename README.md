@@ -1,125 +1,118 @@
 # Towards an AI-Native Blockchain Framework
 
-This repository contains simulation code, a ZKML circuit checklist, PQC sizing spreadsheets, and an IEEE conference-style manuscript on trust scoring for proof-of-useful-intelligence (PoUI) consensus. The paper is a **model and analysis**, not a deployed blockchain.
+This repository contains an **analytical feasibility study** of a Proof of Useful Intelligence (PoUI) trust score, a ZKML design checklist, post-quantum cryptography (PQC) parameter-size scenarios, interface-contract sketches, and an IEEE conference-style manuscript. It is **not** a deployed blockchain, a consensus implementation, a production ZKML audit, or a local ML-DSA/ML-KEM benchmark.
 
-Authors: **Md. Mehedi Hasan**, **Asraful Islam Sharthak**, and **Prof. Dr. Md. Abdul Based**, Principal Investigator
+Authors currently listed in the manuscript: **Md. Mehedi Hasan**, **Asraful Islam Sharthak**, and **Prof. Dr. Md. Abdul Based**. Confirm that every listed author has agreed to authorship and that the author order, affiliation, and contribution statements meet the chosen venue's policy before submission.
 
----
+`AI_Native_Blockchain_Research_Proposal.docx` is the earlier, broader proposal. Its projected work and claims are aspirational. The README and companion artifacts describe the narrower scope of this repository; `paper/main.tex` remains a draft and still needs the author edits listed in `SUBMISSION_CHECKLIST.md` before submission.
 
-## 📂 Repository Structure
-
-The project is structured into modular research components:
+## Repository map
 
 ```
-├── simulation/            # PoUI Consensus Simulation & Theorems (RQ1)
-│   ├── trust_score_model.py     # Trust Score mathematical implementation
-│   ├── run_simulation.py        # 1,000-epoch simulation engine (N=100 nodes)
-│   ├── compare_pos_poui.py      # Efficiency comparison of PoUI vs. PoS
-│   ├── formal_analysis.py       # Formal bounds, Sybil-resistance, & Nash Eq. proofs
-│   └── results/                 # JSON outputs of simulation runs
-│
-├── zkml-analysis/         # ZKML Underconstrained Circuit Taxonomy (RQ2)
-│   ├── zkml_taxonomy.py         # Formulations of V-I through V-V vulnerability classes
-│   └── results/                 # JSON output of the ZKML security taxonomy
-│
-├── pqc-benchmarks/        # Post-Quantum Cryptography (PQC) Benchmarking (RQ3)
-│   └── results/                 # ML-DSA and ML-KEM network and sizing overhead benchmarks
-│
-├── architecture/          # Co-Design Interface Contracts & Failures (RQ4, RQ5)
-│   └── codesign_analysis.py     # Co-design model, slots budgets, and overhead mitigations
-│
-├── literature/            # PRISMA 2020 Systematic Literature Review (SLR)
-│   ├── prisma_slr.py            # Automated SLR database manager (60 papers included)
-│   └── prisma_database.json     # Compiled database of literature review
-│
-└── paper/                 # IEEE TDSC Manuscript & Figure Generators
-    ├── main.tex                 # LaTeX manuscript
-    ├── references.bib           # BibTeX references
-    ├── generate_figures.py      # Script generating key research figures
-    ├── generate_prisma.py       # Script generating the PRISMA 2020 flowchart
-    └── figures/                 # PNG outputs of generated figures
+├── simulation/            # Trust-score model, sampled observables, analysis scripts/results
+├── zkml-analysis/         # Design-level soundness risks; no circuit exploit study
+├── zkml-prototype/        # Tiny ONNX → EZKL local proof/verification smoke test
+├── pqc-benchmarks/        # FIPS parameter sizes and illustrative payload scenarios
+├── architecture/          # Interface-contract and byte-count design sketches
+├── literature/            # Candidate bibliography register; not a PRISMA review
+├── paper/                 # IEEE-style manuscript, bibliography, and figure generators
+├── protocol_spec.md       # Future-protocol sketch and explicit security boundary
+├── reference.md           # Candidate literature catalogue requiring verification
+└── SUBMISSION_CHECKLIST.md
 ```
 
----
+## What the artifacts measure
 
-## 🚀 How to Run the Simulations
+### PoUI trust-score model
 
-### 1. Prerequisite Packages
-Install dependencies (principally NumPy, SciPy, Matplotlib):
+The score is
+
+\[
+T_t=\alpha A_t^2 e^{-\lambda L_t}+\beta\ln U_t-\gamma S_t.
+\]
+
+The Monte Carlo samples accuracy and latency proxies for 100 nodes over 1,000 epochs (70 honest, 15 high-latency, 15 malicious). It does **not** execute a neural network, model a network topology, or implement consensus. Every active node participates every epoch, so `U_t = 1` throughout; availability failures and the uptime term are not exercised. A malicious report below the audit threshold is independently slashed with probability 0.35; the model assumes no honest false positives.
+
+Reproduce the checked-in results with:
+
 ```bash
-pip install numpy scipy matplotlib
-```
-
-### 2. Run PoUI vs. PoS Comparison Simulation
-Evaluate the performance and security bounds of the Proof of Useful Intelligence (PoUI) Trust Score against baseline Proof of Stake (PoS):
-```bash
-python3 simulation/compare_pos_poui.py
-```
-*Note:* The large speed-up in `compare_pos_poui.py` is against a **toy 2%-per-epoch governance vote**, not Ethereum-style proof of stake. The conference paper states this explicitly.
-
-### 2a. Reproduce the paper's trust-score results
-```bash
-# Fixed-seed result used for the per-run summary (seed 42)
+python3 -m pip install numpy
 python3 simulation/run_simulation.py
-
-# Ten-seed aggregate reported in the paper
 python3 simulation/run_multiseed.py
-
-# Closed-form quantities for the stated independent-audit model
 python3 simulation/formal_analysis.py
-
-# Audit-probability and false-positive sensitivity calculations
 python3 simulation/sensitivity_analysis.py
 ```
-The resulting JSON files distinguish analytical quantities from the sampled Monte Carlo. They are not evidence of a trained model, ZKML prover, deployed network, or live PoS comparison.
 
-### 2b. Run the minimal ZKML proof-pipeline smoke test
+The independent-audit calculations are conditional on their stated assumptions. In particular, the formal script computes `E[exp(-lambda L)]` for the simulator's floored-normal latency law; it does not substitute `exp(-lambda E[L])` for that expectation.
+
+### Toy exclusion-rule comparison
+
 ```bash
-# One-time local dependencies (installed under zkml-prototype/.deps)
-python3 -m pip install --target zkml-prototype/.deps ezkl==23.0.5 onnx==1.16.2
+python3 -m pip install numpy matplotlib
+python3 simulation/compare_pos_poui.py
+```
 
-# Deterministic Gemm(2×2) → ReLU ONNX model, then EZKL setup/prove/verify
+This compares two deliberately simplified toy rules, **not PoUI against Ethereum or a representative PoS protocol**. In the vote model, the 0.02 removal probability applies only after a malicious validator is selected for the 10-member committee; it is not a 0.02 per-node-per-epoch probability. Any ratio between the two models is descriptive of those particular assumptions, not a general consensus speedup or security result.
+
+### ZKML materials
+
+`zkml-analysis/zkml_taxonomy.py` lists five design-level circuit-review questions and possible checks. Its V-I Python example is a pedagogical illustration only: it does not construct a ZK circuit, run a prover/verifier, or demonstrate an exploit. The checklist is not an audited or experimentally validated vulnerability study.
+
+The separate smoke test builds a deterministic 2×2 `Gemm → ReLU` ONNX model and runs EZKL setup, proving, and verification:
+
+```bash
+python3 -m pip install --target zkml-prototype/.deps ezkl==23.0.5 onnx==1.16.2
 PYTHONPATH=zkml-prototype/.deps python3 zkml-prototype/run_tiny_mlp.py
 ```
-This creates [artifacts](zkml-prototype/artifacts/) and `zkml-prototype/results.json`. It is a local smoke test only: its model is intentionally tiny, timings are machine-specific, and its locally generated SRS must never be used in deployment.
 
-### 3. Generate Paper Figures
-To regenerate all research figures (Fig. 1-4 and PRISMA Flowchart) in the `paper/figures/` folder:
+This is a local toolchain smoke test, not a general ZKML performance/security evaluation. It uses a locally generated test SRS, which must not be used for deployment. The tested EZKL/KZG proof configuration is not established as post-quantum.
+
+### PQC parameter sizing
+
 ```bash
-# Generate core research figures
-python3 paper/generate_figures.py
+python3 pqc-benchmarks/pqc_benchmark.py
+```
 
-# Generate PRISMA flow diagram
+FIPS/RFC parameter lengths are used in a simplified scenario with one signature per validator per block. Registered public keys are not counted as repeated block payload; ZK proofs, transaction framing, and networking are excluded. The script does not time any cryptographic primitive. Signature aggregation and hardware acceleration are research options, not implemented or measured reductions.
+
+### Architecture sketches
+
+```bash
+python3 architecture/codesign_analysis.py
+```
+
+The four interface contracts, candidate cross-layer properties, and payload arithmetic are design artifacts, not a running stack. The illustrative 100-validator payload keeps all 100 proof payloads even in the signature-only aggregation scenario; Merkle/committee payload is not computed because its format is unspecified.
+
+### Literature catalogue (not PRISMA)
+
+```bash
+python3 literature/prisma_slr.py
 python3 paper/generate_prisma.py
 ```
 
-### 4. Regenerate PRISMA Literature Database
-To recompile the systematic review stats and update the PRISMA JSON database:
+The legacy script names are retained, but these commands only summarize the manually maintained candidate bibliography and generate an inventory graphic. Search queries/results, dates, deduplication records, full-text screening, and exclusion decisions are **not** present. The 60 entries are not verified as a set and must not be presented as a completed PRISMA systematic review. Verify every source against its primary publication before citing it.
+
+## Figures and manuscript
+
+Install `numpy` and `matplotlib`, then regenerate the figures from the checked-in result data:
+
 ```bash
-python3 literature/prisma_slr.py
+python3 -m pip install numpy matplotlib
+python3 paper/generate_figures.py
 ```
 
----
+The taxonomy generator writes `paper/figures/fig_zkml_taxonomy.jpg`, matching the manuscript's include path. The PQC plot reads `pqc-benchmarks/results/pqc_benchmark_results.json`; regenerate that JSON first if scheme parameters change. The literature inventory graphic is explicitly marked **not a PRISMA flow**.
 
-## Summary of results (what the code actually measures)
+`paper/main.tex` is the manuscript source. A LaTeX installation is required to compile it; no current PDF is committed. The exact page limit, template, double-blind rules, artifact policy, and submission eligibility must be checked against the selected conference CFP. The repository's submission checklist is not a substitute for that venue-specific review.
 
-### PoUI trust score
-*   **Simulation:** $N=100$ (70 honest, 15 high-latency, 15 malicious), 1,000 epochs, seed 42. Accuracy/latency are **sampled distributions**, not a trained MobileNet.
-*   **Exclusion:** 15/15 malicious on every one of 10 seeds; 0 honest excluded. Seed 42 mean epoch **2.53**; mean-of-means **3.12** (std 0.71) vs geometric $1/0.35\approx 2.86$.
-*   **Sybil gap:** $\Delta=\alpha\phi_L(\mathbb{E}[A_H^2]-\mathbb{E}[A_F^2])+\gamma p$ under independent $A,L$ (not $e^{-\lambda\mathbb{E}[L]}$).
-*   **One-shot maximizer:** unique at $A_t=1$ (not a repeated-game Nash theorem).
-*   **Exclusion time:** geometric waiting time $M\sim\mathrm{Geo}(p=0.35)$, $\mathbb{E}[M]=1/p\approx 2.86$; sim mean $2.53$ on 15 nodes.
-*   **vs ``PoS'':** toy vote with $p=0.02$/epoch (86.7% excluded, mean epoch 568). Do not report this as Ethereum PoS.
+## Current reference results
 
-### ZKML checklist
-Five underconstraint patterns (range, witness choice, missing layers, quantization slack, wrong-model commitment). Design requirements, **not** an EZKL/Halo2 exploit study.
+- Seed 42: 15/15 malicious nodes excluded; mean exclusion epoch 2.53; no honest nodes excluded under the zero-false-positive model.
+- Ten seeds: all 15 malicious nodes excluded in each run; mean of per-seed means 3.12 epochs (sample standard deviation 0.71), compared with the independent geometric model's `1/0.35 ≈ 2.86` epochs.
+- The comparison script's stored vote-model outcome is a toy-model result only; do not report it as a PoS benchmark.
+- EZKL smoke test: one tiny model only; timings are machine-specific and its SRS is for local testing only.
+- PQC: parameter sizing and scenario arithmetic only; no local PQC primitive benchmark.
 
-### PQC sizing
-ML-DSA / ML-KEM **parameter tables + published timings**, not a local liboqs benchmark. Aggregation to ~200 KB/block is an assumption, not a measured aggregator.
+## Submission hygiene
 
-### Co-design
-Interface contracts IC-01–IC-04 and failure modes (slot race, key-rotation desync, classical bootstrap, size overflow). Architecture notes, not a running node.
-
----
-
-*This project is released under the MIT License.*
+Before public distribution, verify all references and author details, compile the final manuscript with the chosen conference template, and ensure figures/results are regenerated from the final sources. **No `LICENSE` file is currently included**, despite earlier repository text describing an MIT license; settle and add the appropriate license before redistributing the code.

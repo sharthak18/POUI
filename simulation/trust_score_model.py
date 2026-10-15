@@ -47,13 +47,10 @@ class NodeConfig:
     # High latency multiplier
     high_latency_multiplier: float = 3.0
 
-    # Exclusion threshold: node excluded if Trust Score drops below this
-    # Calibrated: honest nodes score ~0.20–0.38; malicious nodes score ~-0.05
-    # after slash accumulation, they drop below threshold
+    # Exclusion threshold: a valid slash drops the current score below this
+    # threshold under the configured parameters. Scores are per-epoch, not
+    # accumulated; the simulator currently has no missed-epoch process.
     exclusion_threshold: float = -0.5
-
-    # Uptime window (epochs to track)
-    uptime_window: int = 50
 
 
 @dataclass
@@ -110,10 +107,11 @@ class Node:
         - Malicious nodes are detected with p=0.35 per epoch when acc < threshold.
         - Honest nodes are never slashed (false-positive rate = 0).
         Returns 1 if slashed, 0 otherwise.
-        Note: In a real system this uses cryptographic ZKP-based proofs.
+        The Bernoulli draw is only a simulation abstraction; no audit, proof,
+        or evidence-verification mechanism is implemented here.
         """
         if self.node_type == NodeType.MALICIOUS and accuracy < threshold:
-            # Probabilistic detection — models real-world auditing pipeline delay
+            # Independent Bernoulli trial specified by this simulation model.
             detection_prob = 0.35
             return int(rng.random() < detection_prob)
         return 0
@@ -138,8 +136,9 @@ class Node:
         L_t = self.sample_latency(rng)
         S_t = self.detect_slash(A_t, rng)
 
-        # Update uptime ratio over sliding window
-        window = min(self.total_epochs, cfg.uptime_window)
+        # Availability is not sampled in this simulation: every active node
+        # participates in every epoch, so U_t remains exactly 1.0. The score's
+        # uptime term is therefore not exercised by the Monte Carlo experiment.
         self.cumulative_uptime_ratio = self.epochs_online / self.total_epochs
 
         # Protect ln(0) — uptime ratio ∈ (0, 1]

@@ -6,7 +6,11 @@
     "n_high_latency": 15,
     "n_malicious": 15,
     "random_seed": 42,
-    "elapsed_seconds": 0.967
+    "elapsed_seconds": 0.794,
+    "accuracy_model": "honest=clip(N(0.90, 0.05^2), 0, 1); malicious=Uniform(0.10, 0.30)",
+    "latency_model": "base=max(1 ms, N(50 ms, 10 ms^2)); high-latency nodes add 30 ms",
+    "availability_model": "No outages or missed epochs are sampled; U_t=1 for active nodes.",
+    "audit_model": "Malicious reports below 0.40 are slashed with independent probability 0.35 per epoch; honest false-positive rate is 0."
   },
   "malicious_exclusion": {
     "total_excluded": 15,
@@ -34,7 +38,7 @@
       "98": 8
     }
   },
-  "honest_node_rewards": {
+  "honest_node_scores": {
     "mean_final_trust": 0.2542,
     "std_final_trust": 0.0399,
     "min_final_trust": 0.1729,
@@ -49,8 +53,9 @@
     "latency_self_regulation": "penalized_not_excluded"
   },
   "trust_distribution": {
-    "final_gini": 0.1079,
-    "mean_gini_over_run": 0.1018
+    "final_gini_absolute_score_magnitudes": 0.1079,
+    "mean_gini_absolute_score_magnitudes_over_run": 0.1018,
+    "interpretation": "Gini is computed on absolute trust-score magnitudes among active nodes; it is descriptive and is not a fairness or reward metric."
   },
   "epoch_series": {
     "active_honest": [
@@ -4061,7 +4066,7 @@
       null,
       null
     ],
-    "gini": [
+    "gini_absolute_score_magnitudes": [
       0.16670907970698812,
       0.1537532454596502,
       0.14288772132360772,

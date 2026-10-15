@@ -18,7 +18,7 @@ def main() -> None:
     for seed in SEEDS:
         result = run_simulation(seed=seed, verbose=False)
         exclusion = result["malicious_exclusion"]
-        honest = result["honest_node_rewards"]
+        honest = result["honest_node_scores"]
         runs.append({
             "seed": seed,
             "malicious_excluded": exclusion["total_excluded"],
