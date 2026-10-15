@@ -164,63 +164,46 @@ print(f"Saved: {out_dir}/fig_pqc_benchmarks.png")
 # ═══════════════════════════════════════════════════════════════════
 # FIGURE 2: ZKML Design Checklist Visual
 # ═══════════════════════════════════════════════════════════════════
-fig2, ax = plt.subplots(figsize=(14, 7), facecolor=BG)
+fig2, ax = plt.subplots(figsize=(4.0, 4.8), facecolor=BG)
 ax.set_facecolor(BG)
 ax.axis("off")
-fig2.suptitle("ZKML Circuit-Soundness Review Checklist for PoUI\n"
-              "Analytical Feasibility Study",
-              fontsize=13, fontweight="bold", color=TXT_H)
+ax.set_aspect("auto")
+ax.set_position([0.0, 0.0, 1.0, 1.0])
+fig2.suptitle("ZKML Circuit Review Checklist\n"
+              "Questions for Future Implementations",
+              fontsize=11, fontweight="bold", color=TXT_H)
 
 checklist_data = [
-    ("V-I",   "Range &\nrepresentation", "Bounded integer wires", C_MAL),
-    ("V-II",  "Tie-breaking\nsemantics", "ArgMax/TopK outputs", C_AMBER),
-    ("V-III", "Layer-relation\ncoverage", "Intermediate values", C_PURPLE),
-    ("V-IV",  "Quantization\nconfiguration", "Scale, rounding, overflow", "#79c0ff"),
-    ("V-V",   "Model/version\nbinding", "Weights and commitment", C_MAL),
+    ("V-I", "Range", "Bounded values:\nrange-checked under\nfield encoding?", C_MAL),
+    ("V-II", "Ties", "Are ArgMax/TopK ties\ndefined and enforced?", C_AMBER),
+    ("V-III", "Layers", "Does each layer follow\nits specified relation?", C_PURPLE),
+    ("V-IV", "Quantization", "Are scale, rounding,\nclipping, overflow fixed?", "#79c0ff"),
+    ("V-V", "Model", "Are weights tied to\nauthorized model version?", C_MAL),
 ]
 
-for i, (vid, name, layers, color) in enumerate(checklist_data):
-    x0 = 0.05 + i * 0.19
-    # Main box
-    rect = mpatches.FancyBboxPatch((x0, 0.35), 0.16, 0.50,
-                                    boxstyle="round,pad=0.02",
+for i, (vid, name, question, color) in enumerate(checklist_data):
+    col = i % 2
+    row = i // 2
+    x0 = 0.28 if i == 4 else 0.04 + col * 0.48
+    y0 = 0.64 - row * 0.235
+    rect = mpatches.FancyBboxPatch((x0, y0), 0.44, 0.215,
+                                    boxstyle="round,pad=0.012",
                                     facecolor=color, alpha=0.15,
                                     edgecolor=color, linewidth=2,
                                     transform=ax.transAxes)
     ax.add_patch(rect)
-    # Class ID
-    ax.text(x0 + 0.08, 0.81, vid, ha='center', va='center',
-            fontsize=16, fontweight='bold', color=color, transform=ax.transAxes)
-    # Name
-    ax.text(x0 + 0.08, 0.72, name, ha='center', va='center',
-            fontsize=8.5, color=TXT_H, transform=ax.transAxes)
-    # Requirement badge
-    badge_color = C_ACCENT
-    badge = mpatches.FancyBboxPatch((x0 + 0.02, 0.57), 0.12, 0.07,
-                                     boxstyle="round,pad=0.01",
-                                     facecolor=badge_color, alpha=0.3,
-                                     edgecolor=badge_color, linewidth=1,
-                                     transform=ax.transAxes)
-    ax.add_patch(badge)
-    ax.text(x0 + 0.08, 0.605, "Review focus", ha='center', va='center',
-            fontsize=7, color=badge_color, fontweight='bold', transform=ax.transAxes)
-    # Affected layers
-    ax.text(x0 + 0.08, 0.46, f"Layers:\n{layers}", ha='center', va='center',
-            fontsize=7, color=TXT, transform=ax.transAxes)
-    ax.text(x0 + 0.08, 0.38, "Audit question", ha='center', va='center',
-            fontsize=7, color=C_ACCENT, fontweight='bold', transform=ax.transAxes)
+    ax.text(x0 + 0.035, y0 + 0.162, vid, ha='left', va='center',
+            fontsize=10, fontweight='bold', color=color, transform=ax.transAxes)
+    ax.text(x0 + 0.15, y0 + 0.162, name, ha='left', va='center',
+            fontsize=7.8, fontweight='bold', color=TXT_H, transform=ax.transAxes)
+    ax.text(x0 + 0.22, y0 + 0.075, question, ha='center', va='center',
+            fontsize=8.2, color=TXT, transform=ax.transAxes, linespacing=1.25)
 
-# Soundness condition box
-ax.add_patch(mpatches.FancyBboxPatch((0.05, 0.08), 0.90, 0.20,
-             boxstyle="round,pad=0.02", facecolor="#161b22",
-             edgecolor=C_ACCENT, linewidth=1.5, transform=ax.transAxes))
-ax.text(0.50, 0.24, "Soundness target: accepted outputs satisfy the intended, bound model/input relation.",
-        ha='center', va='center', fontsize=9.5, color=C_ACCENT,
-        fontweight='bold', transform=ax.transAxes)
-ax.text(0.50, 0.14, "Design checklist only — not a compiler-specific audit or exploit study.",
-        ha='center', va='center', fontsize=8.5, color=TXT, transform=ax.transAxes)
+ax.text(0.5, 0.035,
+        "Review checklist only; not a compiler-specific audit or exploit study.",
+        ha='center', va='center', fontsize=7.2, color=TXT, transform=ax.transAxes)
 
-fig2.savefig(out_dir / "fig_zkml_taxonomy.jpg", dpi=150, bbox_inches="tight", facecolor=BG)
+fig2.savefig(out_dir / "fig_zkml_taxonomy.jpg", dpi=220, facecolor=BG)
 plt.close()
 print(f"Saved: {out_dir}/fig_zkml_taxonomy.jpg")
 
@@ -228,84 +211,95 @@ print(f"Saved: {out_dir}/fig_zkml_taxonomy.jpg")
 # ═══════════════════════════════════════════════════════════════════
 # FIGURE 3: Architecture Co-Design Diagram
 # ═══════════════════════════════════════════════════════════════════
-fig3, ax3 = plt.subplots(figsize=(14, 8), facecolor=BG)
+fig3, ax3 = plt.subplots(figsize=(16, 8), facecolor=BG)
 ax3.set_facecolor(BG)
 ax3.axis("off")
 fig3.suptitle("PoUI Challenge--Proof--Score Requirements\n"
-              "Analytical Feasibility Study",
-              fontsize=13, fontweight="bold", color=TXT_H)
+              "Proposed interfaces, bindings, and unresolved design questions",
+              fontsize=14, fontweight="bold", color=TXT_H)
 
 layers = [
     {"label": "L1: PoUI Consensus Layer",
-     "desc": "Epoch nonce and challenge commitment\nScore update and slash decision\nUnderlying consensus supplies finality",
+     "desc": "Issues epoch challenges and updates scores\nUnderlying consensus supplies finality",
      "color": C_HONEST, "y": 0.68},
     {"label": "L2: ZKML Proof Layer",
-     "desc": "Committed model inference\nProof binds challenge, model, and output\nVerifier accepts or rejects proof",
+     "desc": "Proves inference for a committed model\nBinds challenge, model, configuration, and output",
      "color": C_ACCENT, "y": 0.42},
     {"label": "L3: PQC Key and Signature Interfaces",
-     "desc": "ML-DSA signature binds the transcript\nML-KEM can protect probe delivery\nKey-to-identity binding is required",
+     "desc": "ML-DSA authenticates the transcript\nML-KEM supports confidential probe delivery\nKeys must be authenticated to validator identity",
      "color": C_PURPLE, "y": 0.16},
 ]
 
 for layer in layers:
-    rect = mpatches.FancyBboxPatch((0.05, layer["y"]), 0.55, 0.20,
-                                    boxstyle="round,pad=0.02",
+    rect = mpatches.FancyBboxPatch((0.035, layer["y"]), 0.53, 0.20,
+                                    boxstyle="round,pad=0.015",
                                     facecolor=layer["color"], alpha=0.12,
                                     edgecolor=layer["color"], linewidth=2,
                                     transform=ax3.transAxes)
     ax3.add_patch(rect)
-    ax3.text(0.325, layer["y"] + 0.135, layer["label"],
+    ax3.text(0.30, layer["y"] + 0.145, layer["label"],
              ha='center', va='center', fontsize=11,
              fontweight='bold', color=layer["color"], transform=ax3.transAxes)
-    ax3.text(0.325, layer["y"] + 0.065, layer["desc"],
+    ax3.text(0.30, layer["y"] + 0.065, layer["desc"],
              ha='center', va='center', fontsize=8.5, color=TXT, transform=ax3.transAxes)
 
-# Arrows between layers
-for y_start, label_ic in [(0.68, "IC-01: RequestInferenceProof\nIC-02: SubmitVerifiedOutput"),
-                           (0.42, "IC-03: RegisterValidatorKey\nIC-04: SignProofHash")]:
-    ax3.annotate("", xy=(0.325, y_start - 0.005), xytext=(0.325, y_start - 0.048),
+for y_start in (0.68, 0.42):
+    ax3.annotate("", xy=(0.30, y_start - 0.005), xytext=(0.30, y_start - 0.052),
                  xycoords='axes fraction', textcoords='axes fraction',
-                 arrowprops=dict(arrowstyle='<->', color="#8b949e", lw=2))
-    ax3.text(0.37, y_start - 0.027, label_ic, ha='left', va='center',
-             fontsize=7.5, color="#8b949e", transform=ax3.transAxes)
+                 arrowprops=dict(arrowstyle='<->', color=TXT, lw=1.5))
 
-# Required bindings panel
-props = [
+ax3.add_patch(mpatches.FancyBboxPatch((0.60, 0.52), 0.36, 0.36,
+             boxstyle="round,pad=0.012", facecolor=PANEL,
+             edgecolor=EDGE, linewidth=1.2, transform=ax3.transAxes))
+ax3.text(0.78, 0.83, "Interface contracts", ha='center',
+         fontsize=10, fontweight='bold', color=TXT_H, transform=ax3.transAxes)
+contracts = [
+    ("IC-01", "L1 requests an inference proof from L2"),
+    ("IC-02", "L2 returns signed output and proof to L1"),
+    ("IC-03", "L1 registers authenticated validator keys"),
+    ("IC-04", "L3 key overlap supports in-flight proofs"),
+]
+for i, (cid, desc) in enumerate(contracts):
+    yy = 0.76 - i * 0.065
+    ax3.text(0.625, yy, cid, ha='left', va='center', fontsize=7.5,
+             color=C_ACCENT, fontweight='bold', transform=ax3.transAxes)
+    ax3.text(0.69, yy, desc, ha='left', va='center', fontsize=7.3,
+             color=TXT, transform=ax3.transAxes)
+
+ax3.add_patch(mpatches.FancyBboxPatch((0.60, 0.28), 0.36, 0.20,
+             boxstyle="round,pad=0.012", facecolor=PANEL,
+             edgecolor=EDGE, linewidth=1.2, transform=ax3.transAxes))
+ax3.text(0.78, 0.44, "Transcript bindings", ha='center',
+         fontsize=10, fontweight='bold', color=TXT_H, transform=ax3.transAxes)
+bindings = [
     ("B-1", "Epoch + challenge", C_TEAL),
     ("B-2", "Model + inference config", C_ACCENT),
     ("B-3", "Output + proof hash + signature", C_AMBER),
 ]
-ax3.text(0.72, 0.88, "Fields to Bind\n(before score update)",
-         ha='center', fontsize=10, fontweight='bold', color=TXT_H, transform=ax3.transAxes)
-for i, (pid, name, col) in enumerate(props):
-    y_p = 0.72 - i * 0.13
-    badge = mpatches.FancyBboxPatch((0.63, y_p - 0.03), 0.33, 0.09,
-                                     boxstyle="round,pad=0.01",
-                                     facecolor=col, alpha=0.15,
-                                     edgecolor=col, linewidth=1.5,
-                                     transform=ax3.transAxes)
-    ax3.add_patch(badge)
-    ax3.text(0.795, y_p + 0.015, f"[{pid}] {name}",
-             ha='center', va='center', fontsize=8, color=col,
+for i, (pid, name, color) in enumerate(bindings):
+    ax3.text(0.63, 0.385 - i * 0.052, f"[{pid}] {name}",
+             ha='left', va='center', fontsize=7.5, color=color,
              fontweight='bold', transform=ax3.transAxes)
 
-# Design-scenario panel (no unsupported severity ranking)
+ax3.add_patch(mpatches.FancyBboxPatch((0.60, 0.025), 0.36, 0.22,
+             boxstyle="round,pad=0.012", facecolor=PANEL,
+             edgecolor=EDGE, linewidth=1.2, transform=ax3.transAxes))
+ax3.text(0.78, 0.215, "Open design questions", ha='center',
+         fontsize=10, fontweight='bold', color=TXT_H, transform=ax3.transAxes)
 scenarios = [
     ("FM-CD-1", "Proof deadline mismatch", C_MAL),
     ("FM-CD-2", "Key-version mismatch", C_AMBER),
     ("FM-CD-3", "Enrollment authentication", C_TEAL),
     ("FM-CD-4", "Payload budget unspecified", C_PURPLE),
 ]
-ax3.text(0.72, 0.30, "Design Scenarios to Resolve",
-         ha='center', fontsize=10, fontweight='bold', color=TXT_H, transform=ax3.transAxes)
-for i, (fid, name, col) in enumerate(scenarios):
-    y_f = 0.23 - i * 0.05
-    ax3.text(0.65, y_f, f"[{fid}]", ha='left', va='center',
-             fontsize=7.5, color=col, fontweight='bold', transform=ax3.transAxes)
-    ax3.text(0.73, y_f, name, ha='left', va='center',
-             fontsize=7.5, color=TXT, transform=ax3.transAxes)
+for i, (fid, name, color) in enumerate(scenarios):
+    yy = 0.17 - i * 0.038
+    ax3.text(0.625, yy, f"[{fid}]", ha='left', va='center',
+             fontsize=7, color=color, fontweight='bold', transform=ax3.transAxes)
+    ax3.text(0.70, yy, name, ha='left', va='center',
+             fontsize=7, color=TXT, transform=ax3.transAxes)
 
-fig3.savefig(out_dir / "fig_architecture.png", dpi=150, bbox_inches="tight", facecolor=BG)
+fig3.savefig(out_dir / "fig_architecture.png", dpi=180, bbox_inches="tight", facecolor=BG)
 plt.close()
 print(f"Saved: {out_dir}/fig_architecture.png")
 print("\nAll paper figures generated ✓")

@@ -9,6 +9,11 @@ paper/*.blg
 paper/*.log
 paper/*.out
 paper/*.pdf
+paper/*.fdb_latexmk
+paper/*.fls
+
+# Local virtual environment; install dependencies from README instructions.
+paper/venv/
 
 # Local EZKL environment and cryptographic setup artifacts.
 # Keep run_tiny_mlp.py and results.json; regenerate these files locally.
