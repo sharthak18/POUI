@@ -3,8 +3,11 @@
     "description": "Closed-form calculations for the independent-audit model in paper/main.tex; not a repeated-game or network-security proof.",
     "assumptions": [
       "Accuracy and latency are independent.",
-      "Fabricated reports remain below the audit threshold.",
+      "Honest accuracy is a Normal draw clipped to [0, 1].",
+      "Latency is a Normal draw floored at the configured minimum, matching the simulator.",
+      "The numerical fabricator distribution is Uniform[0.10, 0.30], below the audit threshold.",
       "Each eligible audit is an independent Bernoulli trial.",
+      "U_t = 1; no uptime variation is modeled in the Monte Carlo simulation.",
       "One slash excludes a node only when U_t = 1 and gamma > alpha - tau_excl."
     ]
   },
@@ -18,6 +21,8 @@
     "exclusion_threshold": -0.5,
     "uptime_floor": 1e-09,
     "mean_latency_ms": 50.0,
+    "latency_std_ms": 10.0,
+    "latency_floor_ms": 1.0,
     "honest_accuracy_mean": 0.9,
     "honest_accuracy_std": 0.05,
     "malicious_accuracy_min": 0.1,
@@ -28,15 +33,20 @@
     "lower_bound_with_uptime_floor": -7.71698
   },
   "theorem_2_expected_score_gap": {
-    "latency_factor_at_mean_latency": 0.606531,
+    "latency_model": "L = max(latency_floor_ms, Normal(mean_latency_ms, latency_std_ms^2))",
+    "expected_latency_attenuation": 0.609570898,
+    "plug_in_at_mean_latency_not_used_as_expectation": 0.60653066,
+    "honest_accuracy_second_moment_clipped": 0.811636508,
     "honest_accuracy_second_moment_unclipped": 0.8125,
-    "fabricator_accuracy_second_moment": 0.043333,
-    "expected_gap": 0.758262,
-    "interpretation": "Positive only for the stated low-quality-fabricator audit model."
+    "fabricator_accuracy_second_moment_uniform": 0.043333333,
+    "expected_gap_uniform_fabricator": 0.759167628,
+    "illustrative_constant_probe_accuracy": 0.39,
+    "expected_gap_constant_probe": 0.726017131,
+    "interpretation": "Positive for the stated low-quality-fabricator audit model only; the one-shot audit rule is not a deployed accuracy oracle."
   },
-  "theorem_3_one_shot_maximizer": {
+  "theorem_3_one_shot_score_input_maximizer": {
     "maximizer": 1.0,
-    "interpretation": "The score-only, one-shot objective is maximized at A=1; this is not a repeated-game Nash equilibrium or proof that an implementation can measure true accuracy."
+    "interpretation": "For the toy objective, a freely chosen score input has no cost or truthfulness constraint, so the maximum is attained at A=1. This is a direct property of that objective, not an incentive-compatibility result, a claim about true accuracy, or a repeated-game equilibrium."
   },
   "theorem_4_geometric_exclusion": {
     "expected_epochs": 2.857143,

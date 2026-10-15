@@ -1,5 +1,5 @@
 """
-Generate all paper figures — PQC benchmarks, architecture diagram, ZKML taxonomy.
+Generate the paper's parameter-size, checklist, and architecture figures.
 """
 import json
 import numpy as np
@@ -37,25 +37,28 @@ out_dir.mkdir(exist_ok=True)
 
 
 # ═══════════════════════════════════════════════════════════════════
-# FIGURE 1: PQC Overhead Dashboard
+# FIGURE 1: PQC Parameter-Size and Payload Dashboard
 # ═══════════════════════════════════════════════════════════════════
 fig = plt.figure(figsize=(16, 9), facecolor=BG)
-fig.suptitle("PQC Overhead Analysis — ML-DSA / ML-KEM vs Classical Baselines\n"
-             "Towards an AI-Native Blockchain Framework (RQ3)",
+fig.suptitle("PQC Parameter Sizing — FIPS Byte Sizes and Scenario Payloads\n"
+             "Illustrative model only; no local ML-DSA/ML-KEM benchmark (RQ3)",
              fontsize=13, fontweight="bold", color=TXT_H, y=0.98)
 gs = GridSpec(2, 3, figure=fig, hspace=0.45, wspace=0.38,
               left=0.07, right=0.97, top=0.90, bottom=0.09)
 
-schemes_dsa = ["ECDSA-P256", "Ed25519", "ML-DSA-44", "ML-DSA-65", "ML-DSA-87"]
-sig_bytes   = [64, 64, 2420, 3293, 4595]
-pk_bytes    = [64, 32, 1312, 1952, 2592]
-verify_us   = [170, 130, 83, 122, 164]
-sign_us     = [70, 49, 195, 309, 431]
-colors_bar  = [C_ACCENT, C_ACCENT, C_MAL, C_AMBER, C_PURPLE]
+pqc_results_path = Path(__file__).parent.parent / "pqc-benchmarks" / "results" / "pqc_benchmark_results.json"
+with open(pqc_results_path, encoding="utf-8") as f:
+    pqc_results = json.load(f)
+profiles = pqc_results["signature_schemes"]
+kem_profiles = pqc_results["kem_schemes"]
+scheme_keys = ["ECDSA-P256", "Ed25519", "ML-DSA-44", "ML-DSA-65", "ML-DSA-87"]
+sig_bytes = [profiles[name]["signature_bytes"] for name in scheme_keys]
+pk_bytes = [profiles[name]["public_key_bytes"] for name in scheme_keys]
+colors_bar = [C_ACCENT, C_ACCENT, C_MAL, C_AMBER, C_PURPLE]
 
 # ── Plot 1: Signature sizes ──────────────────────────────────────
 ax1 = fig.add_subplot(gs[0, 0])
-bars = ax1.bar(schemes_dsa, sig_bytes, color=colors_bar, alpha=0.85, edgecolor=EDGE, linewidth=0.8)
+bars = ax1.bar(scheme_keys, sig_bytes, color=colors_bar, alpha=0.85, edgecolor=EDGE, linewidth=0.8)
 ax1.set_title("Signature Size Comparison", fontweight="bold", fontsize=10)
 ax1.set_ylabel("Bytes")
 ax1.set_yscale("log")
@@ -67,48 +70,49 @@ for bar, val in zip(bars, sig_bytes):
 ax1.axhline(64, color=C_ACCENT, linestyle=':', alpha=0.5, linewidth=1, label="Ed25519 baseline")
 ax1.legend(fontsize=7)
 
-# ── Plot 2: Verify CPU time ──────────────────────────────────────
+# ── Plot 2: Public-key parameter sizes ────────────────────────────
 ax2 = fig.add_subplot(gs[0, 1])
-bars2 = ax2.bar(schemes_dsa, verify_us, color=colors_bar, alpha=0.85, edgecolor=EDGE, linewidth=0.8)
-ax2.set_title("Verify Time (µs) per Signature", fontweight="bold", fontsize=10)
-ax2.set_ylabel("Microseconds (µs)")
+bars2 = ax2.bar(scheme_keys, pk_bytes, color=colors_bar, alpha=0.85, edgecolor=EDGE, linewidth=0.8)
+ax2.set_title("Public-Key Parameter Size", fontweight="bold", fontsize=10)
+ax2.set_ylabel("Bytes")
 ax2.tick_params(axis='x', rotation=30, labelsize=7.5)
 ax2.grid(True, axis='y')
-for bar, val in zip(bars2, verify_us):
-    ax2.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 2,
-             f"{val}", ha='center', va='bottom', fontsize=7, color=TXT)
-ax2.text(0.97, 0.92, "ML-DSA-44\nFASTER than Ed25519\nfor verify!",
-         transform=ax2.transAxes, ha='right', va='top', fontsize=7.5,
-         color=C_TEAL, bbox=dict(boxstyle='round,pad=0.3', fc=PANEL, ec=C_TEAL, alpha=0.9))
+for bar, val in zip(bars2, pk_bytes):
+    ax2.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 35,
+             f"{val:,}", ha='center', va='bottom', fontsize=7, color=TXT)
+ax2.text(0.97, 0.92, "Encoding conventions are scheme-specific;\nP-256 uses raw x||y coordinates.",
+         transform=ax2.transAxes, ha='right', va='top', fontsize=7,
+         color=TXT, bbox=dict(boxstyle='round,pad=0.3', fc=PANEL, ec=EDGE, alpha=0.9))
 
-# ── Plot 3: TPS block overhead (3 TPS levels for ML-DSA-44) ──────
+# ── Plot 3: raw signature payload by TPS scenario ─────────────────
 ax3 = fig.add_subplot(gs[0, 2])
-tps_levels = ["100 TPS", "1,000 TPS", "10,000 TPS"]
-overhead_naive = [355.08, 355.08, 355.08]       # KB — TPS doesn't change per-block sig overhead
-overhead_m1    = [202.4/1, 202.4/1, 202.4/1]    # With STARK/Merkle aggregation
-overhead_m3    = [216.9, 216.9, 216.9]           # With standard Merkle batching
-
+payload_rows = [
+    row for row in pqc_results["signature_payload_scenarios"]
+    if row["scheme_key"] == "ML-DSA-44" and row["validator_count"] == 100
+]
+tps_levels = [f"{row['tps_context_only']:,} TPS" for row in payload_rows]
+payload = [row["total_signature_bytes_per_block"] / 1000.0 for row in payload_rows]
 x = np.arange(len(tps_levels))
-w = 0.25
-ax3.bar(x - w, overhead_naive, w, label="Naïve", color=C_MAL, alpha=0.8, edgecolor=EDGE)
-ax3.bar(x,     overhead_m1,    w, label="M1 STARK Agg.", color=C_ACCENT, alpha=0.8, edgecolor=EDGE)
-ax3.bar(x + w, overhead_m3,    w, label="M3 Merkle", color=C_AMBER, alpha=0.8, edgecolor=EDGE)
-ax3.set_title("ML-DSA-44 BFT Consensus Overhead\n(N=100 validators, constant across TPS)", fontweight="bold", fontsize=9)
-ax3.set_ylabel("Overhead (KB/block)")
+ax3.bar(x, payload, 0.58, color=C_MAL, alpha=0.82, edgecolor=EDGE)
+ax3.set_title("Raw ML-DSA-44 Signature Payload\n(100 validators; one signature each/block)", fontweight="bold", fontsize=9)
+ax3.set_ylabel("Decimal kB/block")
 ax3.set_xticks(x); ax3.set_xticklabels(tps_levels, fontsize=8)
-ax3.legend(fontsize=7)
 ax3.grid(True, axis='y')
+ax3.text(0.5, 0.94,
+         "Same per block under this model; public keys are registered.\nProofs and framing excluded; no aggregation evaluated.",
+         transform=ax3.transAxes, ha='center', va='top', fontsize=7,
+         color=TXT, bbox=dict(boxstyle='round,pad=0.3', fc=PANEL, ec=EDGE, alpha=0.95))
 
-# ── Plot 4: KEM performance ──────────────────────────────────────
+# ── Plot 4: ML-KEM parameter sizes ────────────────────────────────
 ax4 = fig.add_subplot(gs[1, 0])
-kem_names    = ["ML-KEM-512", "ML-KEM-768", "ML-KEM-1024"]
-encaps_us    = [29, 43, 62]
-decaps_us    = [26, 39, 56]
+kem_names = list(kem_profiles)
+kem_public_keys = [kem_profiles[name]["public_key_bytes"] for name in kem_names]
+kem_ciphertexts = [kem_profiles[name]["ciphertext_bytes"] for name in kem_names]
 x2 = np.arange(len(kem_names))
-ax4.bar(x2 - 0.2, encaps_us, 0.4, label="Encapsulate", color=C_ACCENT, alpha=0.8, edgecolor=EDGE)
-ax4.bar(x2 + 0.2, decaps_us, 0.4, label="Decapsulate", color=C_PURPLE, alpha=0.8, edgecolor=EDGE)
-ax4.set_title("ML-KEM Key Encapsulation\nOverhead (µs)", fontweight="bold", fontsize=10)
-ax4.set_ylabel("Microseconds")
+ax4.bar(x2 - 0.2, kem_public_keys, 0.4, label="Public key", color=C_ACCENT, alpha=0.8, edgecolor=EDGE)
+ax4.bar(x2 + 0.2, kem_ciphertexts, 0.4, label="Ciphertext", color=C_PURPLE, alpha=0.8, edgecolor=EDGE)
+ax4.set_title("ML-KEM Public-Key and Ciphertext Sizes", fontweight="bold", fontsize=9)
+ax4.set_ylabel("Bytes")
 ax4.set_xticks(x2); ax4.set_xticklabels(kem_names, fontsize=8, rotation=15)
 ax4.legend(fontsize=7)
 ax4.grid(True, axis='y')
@@ -116,8 +120,10 @@ ax4.grid(True, axis='y')
 # ── Plot 5: Signature size amplification radar-style bar ─────────
 ax5 = fig.add_subplot(gs[1, 1])
 dsa_names = ["ML-DSA-44", "ML-DSA-65", "ML-DSA-87"]
-amp_sig  = [37.8, 51.5, 71.8]
-amp_pk   = [41.0, 61.0, 81.0]
+amp_sig = [profiles[name]["signature_bytes"] / profiles["Ed25519"]["signature_bytes"]
+            for name in ["ML-DSA-44", "ML-DSA-65", "ML-DSA-87"]]
+amp_pk = [profiles[name]["public_key_bytes"] / profiles["Ed25519"]["public_key_bytes"]
+          for name in ["ML-DSA-44", "ML-DSA-65", "ML-DSA-87"]]
 x3 = np.arange(len(dsa_names))
 ax5.bar(x3 - 0.2, amp_sig, 0.4, label="Sig Amplification×", color=C_MAL, alpha=0.8, edgecolor=EDGE)
 ax5.bar(x3 + 0.2, amp_pk,  0.4, label="PK Amplification×",  color=C_AMBER, alpha=0.8, edgecolor=EDGE)
@@ -132,22 +138,23 @@ ax5.axhline(1, color=C_ACCENT, linestyle=':', alpha=0.5, linewidth=1)
 ax6 = fig.add_subplot(gs[1, 2])
 ax6.axis("off")
 mit_data = [
-    ["ID", "Strategy", "Reduction", "Feasibility"],
-    ["M1", "STARK Attestations", "~100×", "Medium-term"],
-    ["M2", "Hybrid (Layered)", "~80%", "Immediate"],
-    ["M3", "Merkle Batching", "~log(n)×", "Medium-term"],
-    ["M4", "FPGA/ASIC", "10-50×", "2027+"],
+    ["ID", "Option", "Sizing", "Status"],
+    ["M1", "Aggregate sigs", "Not measured", "Research"],
+    ["M2", "Hybrid rollout", "Not quantified", "Design-specific"],
+    ["M3", "Merkle batch", "Not computed", "Format open"],
+    ["M4", "Hardware", "Not measured", "Not evaluated"],
 ]
 tbl = ax6.table(cellText=mit_data[1:], colLabels=mit_data[0],
-                cellLoc="center", loc="center", bbox=[0, 0, 1, 1])
-tbl.auto_set_font_size(False); tbl.set_fontsize(8)
+                cellLoc="center", loc="center", bbox=[0, 0, 1, 1],
+                colWidths=[0.10, 0.30, 0.28, 0.32])
+tbl.auto_set_font_size(False); tbl.set_fontsize(7)
 for (r, c), cell in tbl.get_celld().items():
     cell.set_facecolor(PANEL); cell.set_edgecolor(EDGE)
     cell.set_text_props(color=TXT)
     if r == 0:
         cell.set_facecolor("#21262d")
         cell.set_text_props(color=TXT_H, fontweight="bold")
-ax6.set_title("Architectural Mitigations", fontweight="bold", fontsize=10)
+ax6.set_title("Architecture Options (Not Evaluated)", fontweight="bold", fontsize=9)
 
 fig.savefig(out_dir / "fig_pqc_benchmarks.png", dpi=150, bbox_inches="tight", facecolor=BG)
 plt.close()
@@ -155,24 +162,24 @@ print(f"Saved: {out_dir}/fig_pqc_benchmarks.png")
 
 
 # ═══════════════════════════════════════════════════════════════════
-# FIGURE 2: ZKML Vulnerability Taxonomy Visual
+# FIGURE 2: ZKML Design Checklist Visual
 # ═══════════════════════════════════════════════════════════════════
 fig2, ax = plt.subplots(figsize=(14, 7), facecolor=BG)
 ax.set_facecolor(BG)
 ax.axis("off")
-fig2.suptitle("ZKML Circuit-Soundness Requirements for PoUI\n"
+fig2.suptitle("ZKML Circuit-Soundness Review Checklist for PoUI\n"
               "Analytical Feasibility Study",
               fontsize=13, fontweight="bold", color=TXT_H)
 
-vuln_data = [
-    ("V-I",   "Range\nEnforcement",       "ReLU, Sigmoid,\nQuantized wires", C_MAL),
-    ("V-II",  "Deterministic\nWitness",    "ArgMax, TopK,\nTied outputs", C_AMBER),
-    ("V-III", "Layer\nLinkage",            "Intermediate layers,\nResidual paths", C_PURPLE),
-    ("V-IV",  "Fixed\nQuantization",       "Scale, zero point,\nQuantized ops", "#79c0ff"),
-    ("V-V",   "Model\nCommitment",         "Weights, model\nversion", C_MAL),
+checklist_data = [
+    ("V-I",   "Range &\nrepresentation", "Bounded integer wires", C_MAL),
+    ("V-II",  "Tie-breaking\nsemantics", "ArgMax/TopK outputs", C_AMBER),
+    ("V-III", "Layer-relation\ncoverage", "Intermediate values", C_PURPLE),
+    ("V-IV",  "Quantization\nconfiguration", "Scale, rounding, overflow", "#79c0ff"),
+    ("V-V",   "Model/version\nbinding", "Weights and commitment", C_MAL),
 ]
 
-for i, (vid, name, layers, color) in enumerate(vuln_data):
+for i, (vid, name, layers, color) in enumerate(checklist_data):
     x0 = 0.05 + i * 0.19
     # Main box
     rect = mpatches.FancyBboxPatch((x0, 0.35), 0.16, 0.50,
@@ -195,27 +202,27 @@ for i, (vid, name, layers, color) in enumerate(vuln_data):
                                      edgecolor=badge_color, linewidth=1,
                                      transform=ax.transAxes)
     ax.add_patch(badge)
-    ax.text(x0 + 0.08, 0.605, "Required constraint", ha='center', va='center',
+    ax.text(x0 + 0.08, 0.605, "Review focus", ha='center', va='center',
             fontsize=7, color=badge_color, fontweight='bold', transform=ax.transAxes)
     # Affected layers
     ax.text(x0 + 0.08, 0.46, f"Layers:\n{layers}", ha='center', va='center',
             fontsize=7, color=TXT, transform=ax.transAxes)
-    ax.text(x0 + 0.08, 0.38, "Required circuit check", ha='center', va='center',
+    ax.text(x0 + 0.08, 0.38, "Audit question", ha='center', va='center',
             fontsize=7, color=C_ACCENT, fontweight='bold', transform=ax.transAxes)
 
 # Soundness condition box
 ax.add_patch(mpatches.FancyBboxPatch((0.05, 0.08), 0.90, 0.20,
              boxstyle="round,pad=0.02", facecolor="#161b22",
              edgecolor=C_ACCENT, linewidth=1.5, transform=ax.transAxes))
-ax.text(0.50, 0.24, "Circuit Soundness: ∀ (x, y, π): Verify(C, x, y, π) = 1  ⟹  y = f(x)",
+ax.text(0.50, 0.24, "Soundness target: accepted outputs satisfy the intended, bound model/input relation.",
         ha='center', va='center', fontsize=9.5, color=C_ACCENT,
         fontweight='bold', transform=ax.transAxes)
-ax.text(0.50, 0.14, "Checklist only: a compiler/model-specific audit is still required before deployment.",
+ax.text(0.50, 0.14, "Design checklist only — not a compiler-specific audit or exploit study.",
         ha='center', va='center', fontsize=8.5, color=TXT, transform=ax.transAxes)
 
-fig2.savefig(out_dir / "fig_zkml_taxonomy.png", dpi=150, bbox_inches="tight", facecolor=BG)
+fig2.savefig(out_dir / "fig_zkml_taxonomy.jpg", dpi=150, bbox_inches="tight", facecolor=BG)
 plt.close()
-print(f"Saved: {out_dir}/fig_zkml_taxonomy.png")
+print(f"Saved: {out_dir}/fig_zkml_taxonomy.jpg")
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -235,8 +242,8 @@ layers = [
     {"label": "L2: ZKML Proof Layer",
      "desc": "Committed model inference\nProof binds challenge, model, and output\nVerifier accepts or rejects proof",
      "color": C_ACCENT, "y": 0.42},
-    {"label": "L3: PQC Signature Layer",
-     "desc": "ML-DSA signs the proof transcript\nML-KEM delivers hidden probes\nKey version overlap at rotation",
+    {"label": "L3: PQC Key and Signature Interfaces",
+     "desc": "ML-DSA signature binds the transcript\nML-KEM can protect probe delivery\nKey-to-identity binding is required",
      "color": C_PURPLE, "y": 0.16},
 ]
 
@@ -264,11 +271,11 @@ for y_start, label_ic in [(0.68, "IC-01: RequestInferenceProof\nIC-02: SubmitVer
 
 # Required bindings panel
 props = [
-    ("B-1", "Epoch + validator nonce", C_TEAL),
-    ("B-2", "Model + quantization commitment", C_ACCENT),
-    ("B-3", "Output + proof-hash signature", C_AMBER),
+    ("B-1", "Epoch + challenge", C_TEAL),
+    ("B-2", "Model + inference config", C_ACCENT),
+    ("B-3", "Output + proof hash + signature", C_AMBER),
 ]
-ax3.text(0.72, 0.88, "Required Bindings\n(before score update)",
+ax3.text(0.72, 0.88, "Fields to Bind\n(before score update)",
          ha='center', fontsize=10, fontweight='bold', color=TXT_H, transform=ax3.transAxes)
 for i, (pid, name, col) in enumerate(props):
     y_p = 0.72 - i * 0.13
@@ -282,23 +289,21 @@ for i, (pid, name, col) in enumerate(props):
              ha='center', va='center', fontsize=8, color=col,
              fontweight='bold', transform=ax3.transAxes)
 
-# Risks panel
-fms = [
-    ("FM-CD-1", "Proving-Slot Race",       "High",   C_MAL),
-    ("FM-CD-2", "Key Rotation Desync",     "Medium", C_AMBER),
-    ("FM-CD-3", "Bootstrap Paradox",       "Low",    C_TEAL),
-    ("FM-CD-4", "Size Budget Overflow",    "High",   C_MAL),
+# Design-scenario panel (no unsupported severity ranking)
+scenarios = [
+    ("FM-CD-1", "Proof deadline mismatch", C_MAL),
+    ("FM-CD-2", "Key-version mismatch", C_AMBER),
+    ("FM-CD-3", "Enrollment authentication", C_TEAL),
+    ("FM-CD-4", "Payload budget unspecified", C_PURPLE),
 ]
-ax3.text(0.72, 0.30, "Deployment Risks to Resolve",
+ax3.text(0.72, 0.30, "Design Scenarios to Resolve",
          ha='center', fontsize=10, fontweight='bold', color=TXT_H, transform=ax3.transAxes)
-for i, (fid, name, sev, col) in enumerate(fms):
-    y_f = 0.22 - i * 0.07
+for i, (fid, name, col) in enumerate(scenarios):
+    y_f = 0.23 - i * 0.05
     ax3.text(0.65, y_f, f"[{fid}]", ha='left', va='center',
              fontsize=7.5, color=col, fontweight='bold', transform=ax3.transAxes)
     ax3.text(0.73, y_f, name, ha='left', va='center',
              fontsize=7.5, color=TXT, transform=ax3.transAxes)
-    ax3.text(0.92, y_f, sev, ha='left', va='center',
-             fontsize=7, color=col, transform=ax3.transAxes)
 
 fig3.savefig(out_dir / "fig_architecture.png", dpi=150, bbox_inches="tight", facecolor=BG)
 plt.close()

@@ -1,10 +1,10 @@
 """
 Simulation Analysis and Visualization
 =======================================
-Generates publication-quality figures from simulation results:
+Generates descriptive figures from the sampled simulation results:
   Fig 1: Malicious node exclusion timeline (cumulative)
   Fig 2: Trust Score trajectories by node type
-  Fig 3: Gini coefficient over epochs (fairness)
+  Fig 3: Gini coefficient of absolute score magnitudes (not a fairness metric)
   Fig 4: High-latency vs honest trust score distribution (box plot)
   Fig 5: Epoch-by-epoch mean trust score comparison
 
@@ -64,7 +64,7 @@ active_honest    = series["active_honest"]
 active_malicious = series["active_malicious"]
 mean_trust_hon   = series["mean_trust_honest"]
 mean_trust_mal   = [v if v is not None else np.nan for v in series["mean_trust_malicious"]]
-gini             = series["gini"]
+gini_abs         = series["gini_absolute_score_magnitudes"]
 
 node_stats = results["node_stats"]
 honest_stats   = [n for n in node_stats if n["node_type"] == "honest"]
@@ -84,7 +84,7 @@ for e in epochs:
 fig = plt.figure(figsize=(18, 11), facecolor=BG_DARK)
 fig.suptitle(
     "PoUI Trust Score Simulation — N=100 Nodes, T=1,000 Epochs\n"
-    "Towards an AI-Native Blockchain Framework",
+    "Sampled observables only; no model inference or deployed chain",
     fontsize=14, fontweight="bold", color="#e6edf3", y=0.98
 )
 
@@ -124,21 +124,16 @@ ax2.grid(True)
 
 # ── Plot 3: Gini coefficient over time ───────────────────────────────────────
 ax3 = fig.add_subplot(gs[0, 2])
-ax3.plot(epochs, gini, color=ACCENT_COLOR, linewidth=1.5, alpha=0.9)
-ax3.fill_between(epochs, gini, alpha=0.15, color=ACCENT_COLOR)
-ax3.axhline(np.mean(gini), color=ACCENT_COLOR, linestyle="--",
-            linewidth=1, alpha=0.7, label=f"Mean Gini: {np.mean(gini):.4f}")
-ax3.set_title("Trust Score Distribution Fairness\n(Gini Coefficient)", fontweight="bold")
+ax3.plot(epochs, gini_abs, color=ACCENT_COLOR, linewidth=1.5, alpha=0.9)
+ax3.fill_between(epochs, gini_abs, alpha=0.15, color=ACCENT_COLOR)
+ax3.axhline(np.mean(gini_abs), color=ACCENT_COLOR, linestyle="--",
+            linewidth=1, alpha=0.7, label=f"Mean: {np.mean(gini_abs):.4f}")
+ax3.set_title("Gini of Absolute Active-Score Magnitudes\n(Descriptive Only; Not Fairness)", fontweight="bold")
 ax3.set_xlabel("Epoch")
-ax3.set_ylabel("Gini Coefficient")
+ax3.set_ylabel("Gini coefficient")
 ax3.set_ylim(0, 0.6)
 ax3.legend(fontsize=8)
 ax3.grid(True)
-# Annotation: after malicious exclusion, Gini drops
-ax3.annotate("Gini drops after\nmalicious exclusion",
-             xy=(15, gini[14]), xytext=(80, 0.35),
-             fontsize=7.5, color=ACCENT_COLOR,
-             arrowprops=dict(arrowstyle="->", color=ACCENT_COLOR, lw=1))
 
 # ── Plot 4: Box plot of final trust scores by node type ───────────────────────
 ax4 = fig.add_subplot(gs[1, 0])
@@ -148,7 +143,7 @@ malicious_finals = [n["mean_trust_score"] for n in malicious_stats]
 
 bp = ax4.boxplot(
     [honest_finals, hl_finals, malicious_finals],
-    labels=["Honest", "High-Latency", "Malicious"],
+    tick_labels=["Honest", "High-Latency", "Malicious"],
     patch_artist=True,
     medianprops=dict(color="white", linewidth=2),
     whiskerprops=dict(color="#8b949e"),
@@ -182,20 +177,20 @@ ax6 = fig.add_subplot(gs[1, 2])
 ax6.axis("off")
 
 mal = results["malicious_exclusion"]
-hon = results["honest_node_rewards"]
+hon = results["honest_node_scores"]
 hl  = results["high_latency_node_behavior"]
 
 table_data = [
     ["Metric", "Value"],
-    ["Malicious excluded", f"{mal['total_excluded']}/{mal['total_malicious']} (100%)"],
+    ["Malicious excluded", f"{mal['total_excluded']}/{mal['total_malicious']} ({mal['exclusion_rate_pct']}%)"],
     ["Mean exclusion epoch", f"{mal['mean_epoch_to_exclusion']}"],
     ["Fastest exclusion", f"Epoch {mal['min_epoch_to_exclusion']}"],
     ["Honest mean trust", f"{hon['mean_final_trust']} ± {hon['std_final_trust']}"],
-    ["Honest excluded", f"{hon['excluded_count']} (0%)"],
+    ["Honest excluded", f"{hon['excluded_count']}"],
     ["HL mean trust", f"{hl['mean_final_trust']}"],
-    ["HL excluded", f"{hl['excluded_count']} (0%)"],
-    ["Final Gini", f"{results['trust_distribution']['final_gini']}"],
-    ["Mean Gini", f"{results['trust_distribution']['mean_gini_over_run']}"],
+    ["HL excluded", f"{hl['excluded_count']}"],
+    ["Final abs-score Gini", f"{results['trust_distribution']['final_gini_absolute_score_magnitudes']}"],
+    ["Mean abs-score Gini", f"{results['trust_distribution']['mean_gini_absolute_score_magnitudes_over_run']}"],
 ]
 
 tbl = ax6.table(

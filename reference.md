@@ -1,8 +1,12 @@
-# Reference List — Towards an AI-Native Blockchain Framework
+# Candidate Literature Catalogue — Towards an AI-Native Blockchain Framework
 
-Collected by: **Md. Mehedi Hasan** (Team Lead) + **Antigravity AI** (Research Assistant)  
-Target: **60 papers** (PRISMA-compliant SLR)  
-Status: **60/60 collected — PRISMA search complete**
+This is a manually maintained candidate bibliography, not a completed systematic
+literature review. The entries below have not been verified against primary sources
+as a set; author, title, venue, year, DOI/URL, and relevance must be checked before
+citing. The repository does not contain database query logs, deduplication records,
+or PRISMA screening decisions. Do not describe this catalogue as PRISMA-compliant.
+
+Candidate records: **60**. Bibliographic verification: **pending**.
 
 ---
 

@@ -1,17 +1,42 @@
 {
-  "poui": {
-    "total_excluded": 15,
+  "scope": "Single-seed comparison of two deliberately simplified exclusion rules. Not a representative PoS benchmark, protocol security result, or general speedup claim.",
+  "seed": 42,
+  "poui_independent_audit_model": {
+    "rule": "Trust-score threshold with independent eligible-epoch audit probability 0.35",
+    "excluded_count": 15,
+    "malicious_node_count": 15,
+    "mean_exclusion_epoch": 2.53
+  },
+  "selected_member_vote_toy_model": {
+    "rule": "toy selected-member vote",
+    "representative_pos_protocol": false,
+    "validator_count": 100,
+    "committee_size": 10,
+    "malicious_validator_count": 15,
+    "conditional_exclusion_probability": 0.02,
+    "exclusion_probability_is_conditional_on_selection": true,
+    "epochs": 1000,
+    "excluded_count": 15,
     "exclusion_rate_pct": 100.0,
-    "mean_epoch_to_exclusion": 2.53,
-    "min_epoch_to_exclusion": 1,
-    "mechanism": "Automatic Trust Score threshold"
+    "mean_exclusion_epoch_among_excluded": 405.8,
+    "median_exclusion_epoch_among_excluded": 410.0,
+    "exclusion_epoch_by_node": {
+      "96": 38,
+      "90": 58,
+      "99": 193,
+      "93": 232,
+      "88": 270,
+      "95": 318,
+      "97": 386,
+      "94": 410,
+      "85": 447,
+      "98": 467,
+      "86": 516,
+      "91": 570,
+      "89": 630,
+      "87": 727,
+      "92": 825
+    }
   },
-  "pos": {
-    "total_excluded": 13,
-    "exclusion_rate_pct": 86.67,
-    "mean_epoch_to_exclusion": 568.3846153846154,
-    "min_epoch_to_exclusion": 47,
-    "mechanism": "Governance vote (p=0.02/epoch)"
-  },
-  "speedup_factor": 224.65795074490728
+  "figure": "paper/figures/fig_comparison_pos_poui.png"
 }

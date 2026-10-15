@@ -8,9 +8,13 @@ Runs N=100 nodes over T=1,000 epochs with three node classes:
 
 Metrics collected:
   - Epochs before permanent malicious node exclusion
-  - Honest node reward (trust score) distribution
-  - Latency self-regulation behavior
-  - Gini coefficient of trust score distribution
+  - Honest node score distribution
+  - Score differences under sampled latency
+  - Descriptive Gini coefficient of absolute active-node score magnitudes
+
+Scope: accuracy and latency are sampled proxies, not model inference or a network.
+All active nodes participate every epoch (U_t = 1); no availability failures,
+leader election, message exchange, or consensus finality are simulated.
 
 Authors: Md. Mehedi Hasan (Team Lead), Antigravity AI (Research Assistant)
 Project: Towards an AI-Native Blockchain Framework
@@ -31,7 +35,7 @@ N_EPOCHS        = 1000   # Simulation epochs
 # Node class distribution
 N_HONEST        = 70     # 70% honest nodes
 N_HIGH_LATENCY  = 15     # 15% high-latency honest nodes
-N_MALICIOUS     = 15     # 15% malicious nodes (15% is above realistic threshold — stress test)
+N_MALICIOUS     = 15     # Simulated malicious-node count (15% of N)
 
 RANDOM_SEED     = 42     # For reproducibility
 # ─────────────────────────────────────────────────────────────────────────────
@@ -41,7 +45,9 @@ def gini_coefficient(scores: np.ndarray) -> float:
     """
     Compute the Gini coefficient of trust score distribution.
     Gini = 0 → perfect equality; Gini = 1 → maximum inequality.
-    Used to assess fairness of validator reward distribution.
+    Descriptive summary of absolute score magnitudes only. Because scores may
+    be signed and no reward/selection rule is simulated, this is not a fairness
+    or reward-distribution metric.
     """
     scores = np.sort(np.abs(scores))  # use absolute values for positive domain
     n = len(scores)
@@ -162,6 +168,10 @@ def run_simulation(seed: int = RANDOM_SEED, verbose: bool = True) -> Dict[str, A
             "n_malicious": N_MALICIOUS,
             "random_seed": seed,
             "elapsed_seconds": round(elapsed_total, 3),
+            "accuracy_model": "honest=clip(N(0.90, 0.05^2), 0, 1); malicious=Uniform(0.10, 0.30)",
+            "latency_model": "base=max(1 ms, N(50 ms, 10 ms^2)); high-latency nodes add 30 ms",
+            "availability_model": "No outages or missed epochs are sampled; U_t=1 for active nodes.",
+            "audit_model": "Malicious reports below 0.40 are slashed with independent probability 0.35 per epoch; honest false-positive rate is 0.",
         },
         "malicious_exclusion": {
             "total_excluded": len(malicious_exclusion_epochs),
@@ -173,7 +183,7 @@ def run_simulation(seed: int = RANDOM_SEED, verbose: bool = True) -> Dict[str, A
             "max_epoch_to_exclusion": int(max(mal_exclusion_times)) if mal_exclusion_times else None,
             "epoch_breakdown": malicious_exclusion_epochs,
         },
-        "honest_node_rewards": {
+        "honest_node_scores": {
             "mean_final_trust": round(float(np.mean([n.trust_score for n in honest_nodes])), 4),
             "std_final_trust": round(float(np.std([n.trust_score for n in honest_nodes])), 4),
             "min_final_trust": round(float(np.min([n.trust_score for n in honest_nodes])), 4),
@@ -188,8 +198,12 @@ def run_simulation(seed: int = RANDOM_SEED, verbose: bool = True) -> Dict[str, A
             "latency_self_regulation": "penalized_not_excluded",  # expected behavior
         },
         "trust_distribution": {
-            "final_gini": round(epoch_gini[-1], 4),
-            "mean_gini_over_run": round(float(np.mean(epoch_gini)), 4),
+            "final_gini_absolute_score_magnitudes": round(epoch_gini[-1], 4),
+            "mean_gini_absolute_score_magnitudes_over_run": round(float(np.mean(epoch_gini)), 4),
+            "interpretation": (
+                "Gini is computed on absolute trust-score magnitudes among active nodes; "
+                "it is descriptive and is not a fairness or reward metric."
+            ),
         },
         "epoch_series": {
             "active_honest": epoch_active_honest,
@@ -197,7 +211,7 @@ def run_simulation(seed: int = RANDOM_SEED, verbose: bool = True) -> Dict[str, A
             "mean_trust_honest": epoch_mean_trust_honest,
             "mean_trust_malicious": [v if not (isinstance(v, float) and np.isnan(v)) else None
                                      for v in epoch_mean_trust_malicious],
-            "gini": epoch_gini,
+            "gini_absolute_score_magnitudes": epoch_gini,
         },
         "node_stats": node_stats,
     }
@@ -208,7 +222,7 @@ def run_simulation(seed: int = RANDOM_SEED, verbose: bool = True) -> Dict[str, A
 def print_summary(results: Dict[str, Any]) -> None:
     """Pretty-print key results to stdout."""
     mal = results["malicious_exclusion"]
-    hon = results["honest_node_rewards"]
+    hon = results["honest_node_scores"]
     hl  = results["high_latency_node_behavior"]
     td  = results["trust_distribution"]
     sp  = results["simulation_params"]
@@ -235,9 +249,9 @@ def print_summary(results: Dict[str, Any]) -> None:
     print(f"  • Mean latency:      {hl['mean_latency_ms']} ms")
     print(f"  • HL excluded:       {hl['excluded_count']} (latency self-regulation)")
 
-    print(f"\n[RQ1] Trust Score Distribution Fairness:")
-    print(f"  • Final Gini coeff:  {td['final_gini']} (0=equal, 1=unequal)")
-    print(f"  • Mean Gini (run):   {td['mean_gini_over_run']}")
+    print(f"\n[Descriptive absolute-score Gini — not a fairness metric]:")
+    print(f"  • Final Gini:        {td['final_gini_absolute_score_magnitudes']}")
+    print(f"  • Mean over run:     {td['mean_gini_absolute_score_magnitudes_over_run']}")
 
     print(f"\n  Total simulation time: {sp['elapsed_seconds']}s")
     print(f"{'='*60}\n")
