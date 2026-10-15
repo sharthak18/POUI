@@ -251,12 +251,12 @@ ML-KEM-768 can establish a shared secret for confidential probe delivery, an aut
 
 Figure~\ref{fig:architecture} is a requirements diagram, not a running stack. It specifies where future implementations must share data and enforce deadlines.
 
-\begin{figure*}[!t]
+\begin{figure}[!t]
   \centering
-  \includegraphics[width=\textwidth]{figures/fig_architecture.png}
+  \includegraphics[width=\columnwidth]{figures/fig_architecture.png}
   \caption{Proposed challenge/proof/score interfaces and unresolved design scenarios, not an implemented stack.}
   \label{fig:architecture}
-\end{figure*}
+\end{figure}
 
 IC-01 (L1$\to$L2): Request a proof of $y=f_\theta(x)$ under commitment $H(\theta)$, with an example budget of $5$ seconds and around $200$ KB.
 Failures include timeout, underconstrained accept, and out of memory.
