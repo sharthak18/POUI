@@ -224,7 +224,6 @@ To ensure the suggested proof interface is executable, we created a deterministi
 
 \section{Post Quantum Sizing}
 \label{sec:pqc}
-% TODO(authors): see REVIEW_NOTES section A. EZKL's Halo2/KZG backend is not post-quantum, and proof bytes are not budgeted next to signature bytes here.
 
 Table~\ref{tab:pqc_sizes} reports byte sizes from FIPS 204 Table~2~\cite{nistfips204}, alongside Ed25519~\cite{rfc8032} and ECDSA-P256~\cite{nistfips1865}. This is a sizing calculation, not a timing benchmark.
 
@@ -285,7 +284,7 @@ N equals $100$, and ten seeds are little. Detection is a coin flip with no false
 This paper clarifies the minimum evidence chain required for a PoUI consensus design: an auditable score, a challenge proof score flow, a circuit that binds the claimed output to the prescribed model, and a cryptographic payload that fits the protocol budget. Under the stated independent audit model, the trust score analysis predicts geometric exclusion and the Monte Carlo is consistent with that prediction. A small EZKL proof demonstrates the selected tool chain, while the sensitivity calculation shows why false positive handling cannot be omitted. The next stage prototype must implement hidden probe delivery, a ceremony derived SRS, a nontrivial compiled circuit, and measured PQC operations before it can make end to end security or performance claims.
 
 
-Code and figure scripts: the companion repository for this manuscript.
+
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
